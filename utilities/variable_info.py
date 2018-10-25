@@ -35,9 +35,9 @@ default_values = {
 	"SV1_L3d"	: -1,
 	"SV1_N2Tpair"	: -1,
 	"SV1_NGTinSvx"	: -99,
-	"deta"	: -99,
-	"dphi"	: -99,
-	"dr"	: -99,
+#	"deta"	: -99,
+#	"dphi"	: -99,
+#	"dr"	: -99,
 	"pt"	: -99,
 	"eta"	: -99,
 	"mass"	: -99
@@ -98,13 +98,14 @@ kin_vars = [
 	"eta"
 ]
 
-angular_vars = [
-	"deta",
-	"dphi",
-	"dr"
-]
+#angular_vars = [
+#	"deta",
+#	"dphi",
+#	"dr"
+#]
+
 fat_jet_vars = [
 	"pt",
 	"eta",
-	"mass"
+	"mass",
 ]

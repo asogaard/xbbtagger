@@ -8,19 +8,9 @@
 import h5py
 import numpy as np
 import pandas as pd
-from labelMap import get_double_label
-import argparse, sys, json
-
-#------------------------------------------------------------
-def parse_args():
-    parser = argparse.ArgumentParser(description=sys.__doc__)
-    parser.add_argument('-sj', '--subjet', default="subjet_ExKt2", help="Subjet collection.")
-    parser.add_argument('-pt_flat', default=0, type=bool, help="Flatten pt distributions.")
-    parser.add_argument('-tt', default=1, type=int, help="Include ttbar background.")
-    parser.add_argument('-o', '--output', help="Output folder where to store h5.")
-    parser.add_argument('-m', '--masscut', type=bool, default=False, help="Apply Higgs mass cut.")
-    parser.add_argument('-pt', '--ptcut', type=int, default=1, help="Apply maximum pT cut on fat-jet.")
-    return parser.parse_args()
+import sys, json
+from utilities.labelMap import get_double_label
+from utilities.common import *
 
 #------------------------------------------------------------
 def find_nearest1D(array,value):
@@ -72,20 +62,20 @@ def ptflat_reweight(num_array,denom_array,ptbins=[],etabins=[]):
     etaarray_denom = denom_array[:,1]
     weight_denom = denom_array[:,2]
 
-    print(len(ptbins), len(etabins))
+    #print(len(ptbins), len(etabins))
     if len(ptbins)==0:
         ptbins = np.linspace(ptarray_num.min(),ptarray_num.max(),101)
     if len(etabins)==0:
         etabins = np.linspace(etaarray_num.min(),etaarray_num.max(),10)
 
-    print "bins", ptbins, etabins
+    #print "bins", ptbins, etabins
     h_num, xedges, yedges = np.histogram2d(ptarray_num, etaarray_num, bins=(ptbins, etabins))
-    print(xedges, yedges)
+    #print(xedges, yedges)
     h_denom, xedges, yedges = np.histogram2d(ptarray_denom, etaarray_denom, bins=(ptbins, etabins))
-    print(xedges, yedges)
+    #print(xedges, yedges)
     a = h_num
     b = h_denom
-    print(np.shape(a))
+    #print(np.shape(a))
 
     mean=np.divide(np.sum(a,axis=0),np.count_nonzero(b,axis=0))
 
@@ -149,14 +139,22 @@ def ptEta_reweight(num_array,denom_array,ptbins=[],etabins=[]):
     return weightarray
 
 
-def produce_weights():
+# Main function definition
+def main ():
 
+    # Parse command-line arguments
     args = parse_args()
-    subjet_collection = args.subjet
 
-    # ---- get xsection info ---- #
-    with open('mc_info.json') as f: xsec_data = json.load(f)
+    # Read in preprocessed data
+    with h5py.File('output/output_Preprocessed.h5', 'r') as h5f:
+        bbjets = h5f['arr_processed_bbjets'][:]
+        dijets = h5f['arr_processed_dijets'][:]
+        if args.tt:
+            ttbar = h5f['arr_processed_ttbar'][:]
+            pass
+        pass
 
+    '''
     # ---- load the input data file ----- #
     # --- signal
     print "Preparing signal samples..."
@@ -169,6 +167,7 @@ def produce_weights():
     #subjet_2_sig = np.array(fsig[subjet_collection+"_2"][:])
     #metadata_tree_sig = np.array(fsig['metadata'])
     for sample in signal_samples:
+
         content = open(input_dir+sample+".txt","r").read().splitlines()
         file_sig.append(content[0].rstrip("\n").replace(" ", "")) #only using one file
         dsid_list.append(sample.split(".")[2])
@@ -359,7 +358,31 @@ def produce_weights():
     #weight_sig=fat_jet_tree_sig['mcEventWeight']/metadata_tree_sig['sumOfWeights']
     #weight_dijet=fat_jet_tree_dijet['mcEventWeight']*xsection/metadata_tree_dijet['nEventsProcessed']
     #if args.tt: weight_top=fat_jet_tree_top['mcEventWeight']/metadata_tree_top['sumOfWeights']
+    '''
 
+    with open(args.output + '/variables.txt', 'r') as varfile:
+        var_list = varfile.read().splitlines()
+        pass
+
+    # Normalise event weights
+    ivar = var_list.index('weight')
+    bbjets[:,ivar] /= np.sum(bbjets[:,ivar])
+    dijets[:,ivar] /= np.sum(dijets[:,ivar])
+    ttbar [:,ivar] /= np.sum(ttbar [:,ivar])
+
+    # Prepare arrays
+    dataset_sig, dataset_dijet, dataset_top = list(), list(), list()
+    for var in ['fat_jet_pt', 'fat_jet_eta', 'weight']:
+        ivar = var_list.index(var)
+        dataset_sig    .append( bbjets[:,ivar] ) #1, #2
+        dataset_dijet  .append( dijets[:,ivar] )
+        if args.tt:
+            dataset_top.append( ttbar [:,ivar] )
+            pass
+        pass
+
+
+    '''
     # alt2 ->  this is commented out
     weight_sig=weight_sig[:]/np.sum(weight_sig)
     weight_dijet=weight_dijet[:]/np.sum(weight_dijet)
@@ -368,11 +391,11 @@ def produce_weights():
     dataset_sig.append(weight_sig)
     dataset_dijet.append(weight_dijet)
     if bool(args.tt) == True: dataset_top.append(weight_top)
-
-    flipped_dataset_sig = np.rot90(np.array(dataset_sig))
+    '''
+    flipped_bb = np.rot90(np.array(dataset_sig))
     flipped_dataset_dijet = np.rot90(np.array(dataset_dijet))
     if bool(args.tt) == True: flipped_dataset_top = np.rot90(np.array(dataset_top))
-
+    '''
     # ------- Extracting bb only (signal) ------- #
     filter_bb = np.array(indices)
     flipped_bb = flipped_dataset_sig[filter_bb]
@@ -381,7 +404,8 @@ def produce_weights():
     print "# bb = %d"%len(flipped_bb)
     print "# dijets = %d"%len(flipped_dataset_dijet)
     if bool(args.tt) == True: print "# top = %d"%len(flipped_dataset_top)
-
+    '''
+    print "((()))",flipped_dataset_dijet.shape
 
     if args.pt_flat==True:
         print "-> p_{T} flat reweighting"
@@ -393,31 +417,19 @@ def produce_weights():
         dijetWeights = ptEta_reweight(flipped_bb,flipped_dataset_dijet)
         bbWeights = ptEta_reweight(flipped_bb,flipped_bb)
         if bool(args.tt) == True: ttbarWeights = ptEta_reweight(flipped_bb,flipped_dataset_top)
-
+    print len(bbWeights), ")))"
+    print len(dijetWeights), ")))"
+    print len(ttbarWeights), ")))"
     h5f = h5py.File(args.output+'/Weight_'+str(args.pt_flat)+'%s.h5'%name_tag, 'w')
     h5f.create_dataset('bb_vs_bb_weights', data=bbWeights)
     h5f.create_dataset('dijet_vs_bb_weights', data=dijetWeights)
     if bool(args.tt) == True: h5f.create_dataset('ttbar_vs_bb_weights', data=ttbarWeights)
 
     h5f.close()
+    return
 
-#------------------------------
+
+# Main function call
 if __name__ == "__main__" :
-
-    args = parse_args()
-
-    global name_tag
-    name_tag = ""
-
-    global input_dir, sigtxt, toptxt, dijettxt
-    input_dir = "/eos/user/e/evillhau/new_double_b_tagger_ines/double-tagger-fun/Preprocessing/"
-    sigtxt = "signal.txt"
-    dijettxt = "dijet.txt"
-    toptxt = "top.txt"
-    #try:
-        #os.mkdir(args.output)
-        #print "Created new output directory."
-    #except Exception as err: sys.exit("Directory already exists.")
-
-    produce_weights()
-
+    main()
+    pass

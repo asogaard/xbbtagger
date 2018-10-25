@@ -1,0 +1,412 @@
+{
+    "301254": {
+        "crossSection": "7.9175E-03",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301254.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m400.deriv.DAOD_FTAG5.e3749_s3126_r9364_r9315_p3596"
+    },
+    "301255": {
+        "crossSection": "1.5935E-03",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301255.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m600.deriv.DAOD_FTAG5.e3749_s3126_r9364_r9315_p3596"
+    },
+    "301256": {
+        "crossSection": "4.9540E-04",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301256.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m800.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301257": {
+        "crossSection": "1.9501E-04",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301257.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m1000.deriv.DAOD_FTAG5.e3749_s3126_r9364_r9315_p3596"
+    },
+    "301258": {
+        "crossSection": "1.2942E-04",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301258.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m1100.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301259": {
+        "crossSection": "8.8575E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301259.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m1200.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301260": {
+        "crossSection": "6.2095E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301260.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m1300.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301261": {
+        "crossSection": "4.4367E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301261.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m1400.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301262": {
+        "crossSection": "3.2265E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301262.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m1500.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301263": {
+        "crossSection": "2.3771E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301263.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m1600.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301264": {
+        "crossSection": "1.7761E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301264.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m1700.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301265": {
+        "crossSection": "1.3423E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301265.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m1800.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301266": {
+        "crossSection": "1.0256E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301266.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m1900.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301267": {
+        "crossSection": "7.8804E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301267.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m2000.deriv.DAOD_FTAG5.e3749_s3126_r9364_r9315_p3596"
+    },
+    "301268": {
+        "crossSection": "6.1134E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301268.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m2100.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301269": {
+        "crossSection": "4.7698E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301269.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m2200.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301270": {
+        "crossSection": "3.7552E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301270.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m2300.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301271": {
+        "crossSection": "2.9735E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301271.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m2400.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301272": {
+        "crossSection": "2.3654E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301272.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m2500.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301273": {
+        "crossSection": "1.8902E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301273.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m2600.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301274": {
+        "crossSection": "1.5197E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301274.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m2700.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301275": {
+        "crossSection": "1.2264E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301275.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m2800.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301276": {
+        "crossSection": "9.9422E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301276.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m2900.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301277": {
+        "crossSection": "8.0888E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301277.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m3000.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301278": {
+        "crossSection": "5.4200E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301278.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m3200.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301279": {
+        "crossSection": "3.6783E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301279.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m3400.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301280": {
+        "crossSection": "2.5369E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301280.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m3600.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301281": {
+        "crossSection": "1.7732E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301281.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m3800.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301282": {
+        "crossSection": "1.2588E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301282.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m4000.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301283": {
+        "crossSection": "9.0855E-08",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301283.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m4200.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301284": {
+        "crossSection": "6.6391E-08",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301284.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m4400.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301285": {
+        "crossSection": "4.9464E-08",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301285.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m4600.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301286": {
+        "crossSection": "3.7451E-08",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301286.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m4800.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301287": {
+        "crossSection": "2.8854E-08",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301287.Pythia8EvtGen_A14NNPDF23LO_Wprime_WZqqqq_m5000.deriv.DAOD_FTAG5.e3743_s3126_r9364_r9315_p3596"
+    },
+    "301322": {
+        "crossSection": "8.9857E-03",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301322.Pythia8EvtGen_A14NNPDF23LO_zprime400_tt.deriv.DAOD_FTAG5.e4061_s3126_r9364_r9315_p3596"
+    },
+    "301323": {
+        "crossSection": "8.7385E-03",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301323.Pythia8EvtGen_A14NNPDF23LO_zprime500_tt.deriv.DAOD_FTAG5.e4061_s3126_r9364_r9315_p3596"
+    },
+    "301324": {
+        "crossSection": "3.1201E-03",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301324.Pythia8EvtGen_A14NNPDF23LO_zprime750_tt.deriv.DAOD_FTAG5.e4061_s3126_r9364_r9315_p3596"
+    },
+    "301325": {
+        "crossSection": "1.1261E-03",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301325.Pythia8EvtGen_A14NNPDF23LO_zprime1000_tt.deriv.DAOD_FTAG5.e4061_s3126_r9364_r9315_p3596"
+    },
+    "301326": {
+        "crossSection": "4.5981E-04",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301326.Pythia8EvtGen_A14NNPDF23LO_zprime1250_tt.deriv.DAOD_FTAG5.e4061_s3126_r9364_r9315_p3596"
+    },
+    "301327": {
+        "crossSection": "2.0685E-04",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301327.Pythia8EvtGen_A14NNPDF23LO_zprime1500_tt.deriv.DAOD_FTAG5.e4061_s3126_r9364_r9315_p3596"
+    },
+    "301328": {
+        "crossSection": "1.0016E-04",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301328.Pythia8EvtGen_A14NNPDF23LO_zprime1750_tt.deriv.DAOD_FTAG5.e4061_s3126_r9364_r9315_p3596"
+    },
+    "301329": {
+        "crossSection": "5.1346E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301329.Pythia8EvtGen_A14NNPDF23LO_zprime2000_tt.deriv.DAOD_FTAG5.e4061_s3126_r9364_r9315_p3596"
+    },
+    "301330": {
+        "crossSection": "2.7481E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301330.Pythia8EvtGen_A14NNPDF23LO_zprime2250_tt.deriv.DAOD_FTAG5.e4061_s3126_r9364_r9315_p3596"
+    },
+    "301331": {
+        "crossSection": "1.5226E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301331.Pythia8EvtGen_A14NNPDF23LO_zprime2500_tt.deriv.DAOD_FTAG5.e4061_s3126_r9364_r9315_p3596"
+    },
+    "301332": {
+        "crossSection": "8.6884E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301332.Pythia8EvtGen_A14NNPDF23LO_zprime2750_tt.deriv.DAOD_FTAG5.e4061_s3126_r9364_r9315_p3596"
+    },
+    "301333": {
+        "crossSection": "5.0843E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301333.Pythia8EvtGen_A14NNPDF23LO_zprime3000_tt.deriv.DAOD_FTAG5.e3723_s3126_r9364_r9315_p3596"
+    },
+    "301334": {
+        "crossSection": "7.2097E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301334.Pythia8EvtGen_A14NNPDF23LO_zprime4000_tt.deriv.DAOD_FTAG5.e3723_s3126_r9364_r9315_p3596"
+    },
+    "301335": {
+        "crossSection": "1.4069E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301335.Pythia8EvtGen_A14NNPDF23LO_zprime5000_tt.deriv.DAOD_FTAG5.e3723_s3126_r9364_r9315_p3596"
+    },
+    "301488": {
+        "crossSection": "1.3181E-03",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301488.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M300.deriv.DAOD_FTAG5.e3820_s3126_s3136_r9364_r9315_p3596"
+    },
+    "301489": {
+        "crossSection": "1.8987E-03",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301489.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M400.deriv.DAOD_FTAG5.e3820_s3126_r9364_r9315_p3596"
+    },
+    "301490": {
+        "crossSection": "8.9144E-04",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301490.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M500.deriv.DAOD_FTAG5.e3820_s3126_r9364_r9315_p3596"
+    },
+    "301491": {
+        "crossSection": "4.1018E-04",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301491.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M600.deriv.DAOD_FTAG5.e3820_s3126_s3136_r9364_r9315_p3596"
+    },
+    "301492": {
+        "crossSection": "2.0140E-04",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301492.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M700.deriv.DAOD_FTAG5.e3820_s3126_s3136_r9364_r9315_p3596"
+    },
+    "301493": {
+        "crossSection": "1.0544E-04",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301493.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M800.deriv.DAOD_FTAG5.e3820_s3126_r9364_r9315_p3596"
+    },
+    "301494": {
+        "crossSection": "5.8282E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301494.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M900.deriv.DAOD_FTAG5.e3820_s3126_s3136_r9364_r9315_p3596"
+    },
+    "301495": {
+        "crossSection": "3.3696E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301495.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M1000.deriv.DAOD_FTAG5.e3820_s3126_r9364_r9315_p3596"
+    },
+    "301496": {
+        "crossSection": "2.0229E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301496.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M1100.deriv.DAOD_FTAG5.e3820_s3126_s3136_r9364_r9315_p3596"
+    },
+    "301497": {
+        "crossSection": "1.2534E-05",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301497.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M1200.deriv.DAOD_FTAG5.e3820_s3126_r9364_r9315_p3596"
+    },
+    "301498": {
+        "crossSection": "7.9788E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301498.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M1300.deriv.DAOD_FTAG5.e3820_s3126_s3136_r9364_r9315_p3596"
+    },
+    "301499": {
+        "crossSection": "5.1969E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301499.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M1400.deriv.DAOD_FTAG5.e3820_s3126_s3136_r9364_r9315_p3596"
+    },
+    "301500": {
+        "crossSection": "3.4527E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301500.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M1500.deriv.DAOD_FTAG5.e3820_s3126_s3136_r9364_r9315_p3596"
+    },
+    "301501": {
+        "crossSection": "2.3347E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301501.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M1600.deriv.DAOD_FTAG5.e3820_s3126_r9364_r9315_p3596"
+    },
+    "301502": {
+        "crossSection": "1.1154E-06",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301502.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M1800.deriv.DAOD_FTAG5.e3820_s3126_s3136_r9364_r9315_p3596"
+    },
+    "301503": {
+        "crossSection": "5.5923E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301503.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M2000.deriv.DAOD_FTAG5.e3820_s3126_r9364_r9315_p3596"
+    },
+    "301504": {
+        "crossSection": "2.4873E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301504.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M2250.deriv.DAOD_FTAG5.e3820_s3126_s3136_r9364_r9315_p3596"
+    },
+    "301505": {
+        "crossSection": "1.1582E-07",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301505.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M2500.deriv.DAOD_FTAG5.e3820_s3126_r9364_r9315_p3596"
+    },
+    "301506": {
+        "crossSection": "5.5896E-08",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301506.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M2750.deriv.DAOD_FTAG5.e3820_s3126_s3136_r9364_r9315_p3596"
+    },
+    "301507": {
+        "crossSection": "2.7744E-08",
+        "filtereff": "1",
+        "name": "mc16_13TeV.301507.MadGraphPythia8EvtGen_A14NNPDF23LO_RS_G_hh_bbbb_c10_M3000.deriv.DAOD_FTAG5.e3820_s3126_r9364_r9315_p3596"
+    },
+    "309450": {
+        "crossSection": "4.7630E-04",
+        "filtereff": "1",
+        "name": "mc16_13TeV.309450.PowhegPy8EG_NNLOPS_nnlo_30_ggH125_bb_kt200.deriv.DAOD_FTAG5.e6281_e5984_s3126_r9364_r9315_p3596"
+    },
+    "361020": {
+        "crossSection": "7.8420E+07",
+        "filtereff": "0.9755",
+        "name": "mc16_13TeV.361020.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ0W.deriv.DAOD_FTAG5.e3569_s3126_r9364_r9315_p3596"
+    },
+    "361021": {
+        "crossSection": "7.8420E+07",
+        "filtereff": "0.00067143",
+        "name": "mc16_13TeV.361021.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ1W.deriv.DAOD_FTAG5.e3569_s3126_r9364_r9315_p3596"
+    },
+    "361022": {
+        "crossSection": "2.4332E+06",
+        "filtereff": "0.00033423",
+        "name": "mc16_13TeV.361022.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2W.deriv.DAOD_FTAG5.e3668_s3126_r9364_r9315_p3596"
+    },
+    "361023": {
+        "crossSection": "2.6454E+04",
+        "filtereff": "0.00032016",
+        "name": "mc16_13TeV.361023.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ3W.deriv.DAOD_FTAG5.e3668_s3126_r9364_r9315_p3596"
+    },
+    "361024": {
+        "crossSection": "2.5463E+02",
+        "filtereff": "0.00053138",
+        "name": "mc16_13TeV.361024.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ4W.deriv.DAOD_FTAG5.e3668_s3126_r9364_r9315_p3596"
+    },
+    "361025": {
+        "crossSection": "4.5535E+00",
+        "filtereff": "0.00092409",
+        "name": "mc16_13TeV.361025.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ5W.deriv.DAOD_FTAG5.e3668_s3126_r9364_r9315_p3596"
+    },
+    "361026": {
+        "crossSection": "2.5753E-01",
+        "filtereff": "0.00094242",
+        "name": "mc16_13TeV.361026.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ6W.deriv.DAOD_FTAG5.e3569_s3126_r9364_r9315_p3596"
+    },
+    "361027": {
+        "crossSection": "1.6215E-02",
+        "filtereff": "0.0003928",
+        "name": "mc16_13TeV.361027.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ7W.deriv.DAOD_FTAG5.e3668_s3126_r9364_r9315_p3596"
+    },
+    "361028": {
+        "crossSection": "6.2503E-04",
+        "filtereff": "0.010176",
+        "name": "mc16_13TeV.361028.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ8W.deriv.DAOD_FTAG5.e3569_s3126_r9364_r9315_p3596"
+    },
+    "361029": {
+        "crossSection": "1.9639E-05",
+        "filtereff": "0.012076",
+        "name": "mc16_13TeV.361029.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ9W.deriv.DAOD_FTAG5.e3569_s3126_r9364_r9315_p3596"
+    },
+    "361030": {
+        "crossSection": "1.1962E-06",
+        "filtereff": "0.0059087",
+        "name": "mc16_13TeV.361030.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ10W.deriv.DAOD_FTAG5.e3569_s3126_r9364_r9315_p3596"
+    },
+    "361031": {
+        "crossSection": "4.2259E-08",
+        "filtereff": "0.0026761",
+        "name": "mc16_13TeV.361031.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ11W.deriv.DAOD_FTAG5.e3569_s3126_r9364_r9315_p3596"
+    },
+    "361032": {
+        "crossSection": "1.0367E-09",
+        "filtereff": "0.00042592",
+        "name": "mc16_13TeV.361032.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ12W.deriv.DAOD_FTAG5.e3668_s3126_s3136_r9364_r9315_p3596"
+    }
+}

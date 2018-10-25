@@ -1,4 +1,5 @@
-output/
+input
+output
 **.root
 **.h5
 **~
