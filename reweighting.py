@@ -1,3 +1,10 @@
+'''
+This the *second* script in the data preparation pipeline for the X->bb tagger
+   preprocessing.py
+ > reweighting.py
+   preparing.py
+'''
+
 # ----------------------------------------------------
 # Ines Ochoa, August 2018
 # Based on Jue Chen's scripts
@@ -8,7 +15,7 @@
 import h5py
 import numpy as np
 import pandas as pd
-import sys, json
+
 from utilities.labelMap import get_double_label
 from utilities.common import *
 
@@ -51,39 +58,46 @@ def makeBinValueDict(array,x_edges,y_edges):
      return binvaldict
 
 #------------------------------------------------------------
-def ptflat_reweight(num_array,denom_array,ptbins=[],etabins=[]):
+def ptflat_reweight(num_array, denom_array, bins_pt=50, bins_eta=10):
     #the inputs should be 2 columns, of the two variables used for reweighting
 
-    ptarray_num = num_array[:,0]
-    etaarray_num = num_array[:,1]
-    weight_num = num_array[:,2]
+    # Separate arrays for numerator
+    num_pt       = num_array  [:,0].astype(np.float)
+    num_eta      = num_array  [:,1].astype(np.float)
+    num_weight   = num_array  [:,2].astype(np.float)
 
-    ptarray_denom = denom_array[:,0]
-    etaarray_denom = denom_array[:,1]
-    weight_denom = denom_array[:,2]
+    # Separate arrays for denominator
+    denom_pt     = denom_array[:,0].astype(np.float)
+    denom_eta    = denom_array[:,1].astype(np.float)
+    denom_weight = denom_array[:,2].astype(np.float)
 
-    #print(len(ptbins), len(etabins))
-    if len(ptbins)==0:
-        ptbins = np.linspace(ptarray_num.min(),ptarray_num.max(),101)
-    if len(etabins)==0:
-        etabins = np.linspace(etaarray_num.min(),etaarray_num.max(),10)
+    # Make sure that bins are set
+    if isinstance(bins_pt, int):
+        print "Using automatic bins for pT  (N = {})".format(bins_pt)
+        bins_pt  = np.linspace(num_pt.min(),  num_pt.max(),  bins_pt  + 1, endpoint=True)
+        pass
 
-    #print "bins", ptbins, etabins
-    h_num, xedges, yedges = np.histogram2d(ptarray_num, etaarray_num, bins=(ptbins, etabins))
-    #print(xedges, yedges)
-    h_denom, xedges, yedges = np.histogram2d(ptarray_denom, etaarray_denom, bins=(ptbins, etabins))
-    #print(xedges, yedges)
+    if isinstance(bins_eta, int):
+        print "Using automatic bins for eta (N = {})".format(bins_eta)
+        bins_eta = np.linspace(num_eta.min(), num_eta.max(), bins_eta + 1, endpoint=True)
+        pass
+
+    # Fill 2D histograms for numerator and denominator
+    # @NOTE: Use weights? Not done in original script
+    h_denom, xedges, yedges = np.histogram2d(denom_pt, denom_eta, bins=(bins_pt, bins_eta), weights=denom_weight)
+    h_num,   _,      _      = np.histogram2d(num_pt,   num_eta,   bins=(bins_pt, bins_eta), weights=num_weight)
+
     a = h_num
     b = h_denom
     #print(np.shape(a))
 
-    mean=np.divide(np.sum(a,axis=0),np.count_nonzero(b,axis=0))
+    mean = np.divide(np.sum(h_num, axis=0), np.count_nonzero(h_denom, axis=0))
 
-    pt=np.ones(len(a))
-    pt.shape=(len(a),1)
-    mean.shape=(len(a[0]),1)
+    pt=np.ones(len(h_num))
+    pt.shape=(len(h_num),1)
+    mean.shape=(len(h_num[0]),1)
     mean=pt*mean.T
-    weight=np.divide(mean,b)
+    weight=np.divide(mean,h_denom)
     weightHist=weight
     weightDict = makeBinValueDict(weightHist,xedges, yedges)
 
@@ -99,44 +113,51 @@ def ptflat_reweight(num_array,denom_array,ptbins=[],etabins=[]):
     return weightarray
 
 #------------------------------------------------------------
-def ptEta_reweight(num_array,denom_array,ptbins=[],etabins=[]):
+def ptEta_reweight(num_array, denom_array, bins_pt=50, bins_eta=10):
     #the inputs should be 2 columns, of the two variables used for reweighting
 
-    ptarray_num = num_array[:,0].astype(np.float)
-    etaarray_num = num_array[:,1].astype(np.float)
-    weight_num = num_array[:,2].astype(np.float)
+    # Separate arrays for numerator
+    num_pt       = num_array  [:,0].astype(np.float)
+    num_eta      = num_array  [:,1].astype(np.float)
+    num_weight   = num_array  [:,2].astype(np.float)
 
-    ptarray_denom = denom_array[:,0].astype(np.float)
-    etaarray_denom = denom_array[:,1].astype(np.float)
-    weight_denom = denom_array[:,2].astype(np.float)
+    # Separate arrays for denominator
+    denom_pt     = denom_array[:,0].astype(np.float)
+    denom_eta    = denom_array[:,1].astype(np.float)
+    denom_weight = denom_array[:,2].astype(np.float)
 
-    if len(ptbins)==0:
-        ptbins = np.linspace(ptarray_num.min(),ptarray_num.max(),51)
-    if len(etabins)==0:
-        etabins = np.linspace(etaarray_num.min(),etaarray_num.max(),11)
+    # Make sure that bins are set
+    if isinstance(bins_pt, int):
+        print "Using automatic bins for pT  (N = {})".format(bins_pt)
+        bins_pt  = np.linspace(num_pt.min(),  num_pt.max(),  bins_pt  + 1, endpoint=True)
+        pass
 
-    h_denom, xedges, yedges = np.histogram2d(ptarray_denom, etaarray_denom, bins=(ptbins, etabins))#, weights=weight_denom)
-    h_num, xedges, yedges = np.histogram2d(ptarray_num, etaarray_num, bins=(ptbins, etabins))#, weights=weight_num)
+    if isinstance(bins_eta, int):
+        print "Using automatic bins for eta (N = {})".format(bins_eta)
+        bins_eta = np.linspace(num_eta.min(), num_eta.max(), bins_eta + 1, endpoint=True)
+        pass
 
-   #replace 0 values in Hdenom
-    for xi in range(len(h_denom)):
-        for yi in range(len(h_denom[0])):
-            if h_denom[xi][yi] == 0:
-                h_denom[xi][yi] = 1
+    # Fill 2D histograms for numerator and denominator
+    # @NOTE: Use weights? Not done in original script
+    h_denom, xedges, yedges = np.histogram2d(denom_pt, denom_eta, bins=(bins_pt, bins_eta), weights=denom_weight)
+    h_num,   _,      _      = np.histogram2d(num_pt,   num_eta,   bins=(bins_pt, bins_eta), weights=num_weight)
 
-    weightHist = np.divide(h_num,h_denom)
+    # Remove zeros in denominator @NOTE: Necessary/proper?
+    h_denom = np.clip(h_denom, 1E-05, None)  # @NOTE: (..., 1, ...)?
 
+    # Take ratio
+    weightHist = np.divide(h_num, h_denom)
 
-    weightDict = makeBinValueDict(weightHist,xedges, yedges)
-    weightarray = []
+    # Compute per-jet weights
+    reweights = []
+    for pt, eta, _ in denom_array:
+        ix = np.clip(np.digitize(pt,  xedges) - 1, 0, len(xedges) - 2)
+        iy = np.clip(np.digitize(eta, yedges) - 1, 0, len(yedges) - 2)
 
-    for row in denom_array:
-        xval = row[0]
-        yval = row[1]
+        reweights.append(weightHist[ix, iy])
+        pass
 
-        weightarray.append( weightDict[find2dBin(xval,yval,xedges,yedges)] )
-
-    return weightarray
+    return reweights
 
 
 # Main function definition
@@ -145,223 +166,18 @@ def main ():
     # Parse command-line arguments
     args = parse_args()
 
-    # Read in preprocessed data
-    with h5py.File('output/output_Preprocessed.h5', 'r') as h5f:
-        bbjets = h5f['arr_processed_bbjets'][:]
-        dijets = h5f['arr_processed_dijets'][:]
-        if args.tt:
-            ttbar = h5f['arr_processed_ttbar'][:]
-            pass
-        pass
-
-    '''
-    # ---- load the input data file ----- #
-    # --- signal
-    print "Preparing signal samples..."
-    signal_samples = open(sigtxt,"r").read().splitlines()
-    file_sig = []
-    dsid_list = []
-    #fsig = h5py.File('/data/users/miochoa/doubleTagger/samples/user.dguest.301503.hbbTraining.e3820_e5984_s3126_r10201_r10210_p3596.p3_output.h5/user.dguest.14784696._000001.output.h5', 'r')
-    #fat_jet_tree_sig = np.array(fsig["fat_jet"][:])
-    #subjet_1_sig = np.array(fsig[subjet_collection+"_1"][:])
-    #subjet_2_sig = np.array(fsig[subjet_collection+"_2"][:])
-    #metadata_tree_sig = np.array(fsig['metadata'])
-    for sample in signal_samples:
-
-        content = open(input_dir+sample+".txt","r").read().splitlines()
-        file_sig.append(content[0].rstrip("\n").replace(" ", "")) #only using one file
-        dsid_list.append(sample.split(".")[2])
-
-    print "Found %d signal samples to combine."%len(file_sig)
-    # get shape from first file
-    fsig = h5py.File(file_sig[0], 'r')
-    print(fsig["fat_jet"])
-    fat_jet_tree_sig = np.array(fsig["fat_jet"]['eta','pt','mass','GhostHBosonsCount'])
-    subjet_1_sig = np.array(fsig[subjet_collection+"_1"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
-    subjet_2_sig = np.array(fsig[subjet_collection+"_2"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
-    dsid = dsid_list[0]
-    xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
-    weight_sig = np.array(fsig["fat_jet"]["mcEventWeight"][:])*xsection/fsig["metadata"]["nEventsProcessed"]
-    fsig.close()
-
-    # loop over remaining ones
-    #for i,f in enumerate(file_sig[1:]):
-    for i in range(1,len(file_sig)):
-        dsid = dsid_list[i]
-        fsig = h5py.File(file_sig[i], 'r')
-        fat_jet_tree_sig = np.hstack((fat_jet_tree_sig,np.array(fsig["fat_jet"]['eta','pt','mass','GhostHBosonsCount'])))
-        subjet_1_sig = np.hstack((subjet_1_sig,np.array(fsig[subjet_collection+"_1"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
-        subjet_2_sig = np.hstack((subjet_2_sig,np.array(fsig[subjet_collection+"_2"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
-        xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
-        weight_sig = np.hstack((weight_sig,np.array(fsig["fat_jet"]["mcEventWeight"][:])*xsection/fsig["metadata"]["nEventsProcessed"]))
-        fsig.close()
-    print "check size (before): %d, %d, %d"%(len(fat_jet_tree_sig),len(subjet_1_sig),len(subjet_2_sig))
-
-    # ---
-    # --- Higgs boson matching for signal -> need to do it for all collections
-    subjet_1_sig = np.extract(fat_jet_tree_sig['GhostHBosonsCount']>=1,subjet_1_sig)
-    subjet_2_sig = np.extract(fat_jet_tree_sig['GhostHBosonsCount']>=1,subjet_2_sig)
-    weight_sig = np.extract(fat_jet_tree_sig['GhostHBosonsCount']>=1,weight_sig)
-    fat_jet_tree_sig = np.extract(fat_jet_tree_sig['GhostHBosonsCount']>=1,fat_jet_tree_sig)
-    print "check size (after 1): %d, %d, %d"%(len(fat_jet_tree_sig),len(subjet_1_sig),len(subjet_2_sig))
-
-    # ---
-    # --- CUTS
-    if bool(args.masscut) == True:
-        massCut = (fat_jet_tree_sig['mass']>=75e3) & (fat_jet_tree_sig['mass']<=145e3)
-        subjet_1_sig = subjet_1_sig[massCut]
-        subjet_2_sig = subjet_2_sig[massCut]
-        fat_jet_tree_sig = fat_jet_tree_sig[massCut]
-        weight_sig =weight_sig[massCut]
-        print "check size (after 2): %d, %d, %d"%(len(fat_jet_tree_sig),len(subjet_1_sig),len(subjet_2_sig))
-
-    if bool(args.ptcut) == True:
-        ptCut = (fat_jet_tree_sig['pt']<3000e3) & (subjet_1_sig['pt']<3000e3) & (subjet_2_sig['pt']<3000e3)
-        subjet_1_sig = subjet_1_sig[ptCut]
-        subjet_2_sig = subjet_2_sig[ptCut]
-        fat_jet_tree_sig = fat_jet_tree_sig[ptCut]
-        weight_sig = weight_sig[ptCut]
-    print "check size (after 3): %d, %d, %d"%(len(fat_jet_tree_sig),len(subjet_1_sig),len(subjet_2_sig))
-    # ---
-
-    # --- dijet
-    print "Preparing dijet samples..."
-    file_dijet = open(dijettxt,"r").read().splitlines()
-    # get shape from first file
-    fdijet = h5py.File(input_dir+file_dijet[0], 'r')
-    fat_jet_tree_dijet = np.array(fdijet["fat_jet"][:50,'eta','pt','mass','GhostHBosonsCount'])
-    subjet_1_dijet = np.array(fdijet[subjet_collection+"_1"][:50,'eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
-    subjet_2_dijet = np.array(fdijet[subjet_collection+"_2"][:50,'eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
-    dsid = file_dijet[0].split(".")[2]
-    xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
-    weight_dijet = np.array(fdijet["fat_jet"][:50,"mcEventWeight"])*xsection/fdijet["metadata"]["nEventsProcessed"]
-    fdijet.close()
-
-    # loop over remaining ones
-    for f in file_dijet[1:]:
-        dsid = f.split(".")[2]
-        fdijet = h5py.File(input_dir+f, 'r')
-        fat_jet_tree_dijet = np.hstack((fat_jet_tree_dijet,np.array(fdijet["fat_jet"][:50,'eta','pt','mass','GhostHBosonsCount'])))
-        subjet_1_dijet = np.hstack((subjet_1_dijet,np.array(fdijet[subjet_collection+"_1"][:50,'eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
-        subjet_2_dijet = np.hstack((subjet_2_dijet,np.array(fdijet[subjet_collection+"_2"][:50,'eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
-        xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
-        weight_dijet = np.hstack((weight_dijet,np.array(fdijet["fat_jet"][:50,"mcEventWeight"])*xsection/fdijet["metadata"]["nEventsProcessed"]))
-        fdijet.close()
-
-    # ---
-    # --- CUTS
-    if bool(args.masscut) == True:
-        massCut = (fat_jet_tree_dijet['mass']>=75e3) & (fat_jet_tree_dijet['mass']<=145e3)
-        subjet_1_dijet = subjet_1_dijet[massCut]
-        subjet_2_dijet = subjet_2_dijet[massCut]
-        fat_jet_tree_dijet = fat_jet_tree_dijet[massCut]
-        weight_dijet = weight_dijet[massCut]
-    print "check size (dijet): %d, %d, %d"%(len(fat_jet_tree_dijet),len(subjet_1_dijet),len(subjet_2_dijet))
-
-    if bool(args.ptcut) == True:
-        ptCut = (fat_jet_tree_dijet['pt']<3000e3) & (subjet_1_dijet['pt']<3000e3) & (subjet_2_dijet['pt']<3000e3)
-        subjet_1_dijet = subjet_1_dijet[ptCut]
-        subjet_2_dijet = subjet_2_dijet[ptCut]
-        fat_jet_tree_dijet = fat_jet_tree_dijet[ptCut]
-        weight_dijet = weight_dijet[ptCut]
-    print "check size (dijet): %d, %d, %d"%(len(fat_jet_tree_dijet),len(subjet_1_dijet),len(subjet_2_dijet))
-
-    # --- top
-    if bool(args.tt) == True:
-        print "Preparing top samples..."
-        top_samples = open(toptxt,"r").read().splitlines()
-        file_top = []
-        dsid_list = []
-        #fsig = h5py.File('/data/users/miochoa/doubleTagger/samples/user.dguest.301503.hbbTraining.e3820_e5984_s3126_r10201_r10210_p3596.p3_output.h5/user.dguest.14784696._000001.output.h5', 'r')
-        #fat_jet_tree_sig = np.array(fsig["fat_jet"][:])
-        #subjet_1_sig = np.array(fsig[subjet_collection+"_1"][:])
-        #subjet_2_sig = np.array(fsig[subjet_collection+"_2"][:])
-        #metadata_tree_sig = np.array(fsig['metadata'])
-        for sample in top_samples:
-            content = open(input_dir+sample+".txt","r").read().splitlines()
-            file_top.append(content[0].rstrip("\n").replace(" ", "")) #only using one file
-            dsid_list.append(sample.split(".")[2])
-
-        print "Found %d top samples to combine."%len(file_sig)
-        # get shape from first file
-        ftop = h5py.File(file_top[0], 'r')
-        fat_jet_tree_top = np.array(ftop["fat_jet"]['eta','pt','mass','GhostHBosonsCount'])
-        subjet_1_top = np.array(ftop[subjet_collection+"_1"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
-        subjet_2_top = np.array(ftop[subjet_collection+"_2"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
-        dsid = dsid_list[0]
-        xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
-        weight_top = np.array(ftop["fat_jet"]["mcEventWeight"][:])*xsection/ftop["metadata"]["nEventsProcessed"]
-        ftop.close()
-
-        #ftop = h5py.File('/data/users/miochoa/doubleTagger/samples/user.dguest.301328.hbbTraining.e4061_s3126_r9364_r9315_p3596.p3_output.h5/user.dguest.14784799._000001.output.h5', 'r')
-        #fat_jet_tree_top = np.array(ftop["fat_jet"][:])
-        #subjet_1_top = np.array(ftop[subjet_collection+"_1"][:])
-        #subjet_2_top = np.array(ftop[subjet_collection+"_2"][:])
-        #metadata_tree_top = np.array(ftop['metadata'])
-        # loop over remaining ones
-        for i in range(1,len(file_top)):
-            dsid = dsid_list[i]
-            ftop = h5py.File(file_top[i], 'r')
-            fat_jet_tree_top = np.hstack((fat_jet_tree_top,np.array(ftop["fat_jet"]['eta','pt','mass','GhostHBosonsCount'])))
-            subjet_1_top = np.hstack((subjet_1_top,np.array(ftop[subjet_collection+"_1"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
-            subjet_2_top = np.hstack((subjet_2_top,np.array(ftop[subjet_collection+"_2"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
-            xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
-            weight_top = np.hstack((weight_top,np.array(ftop["fat_jet"]["mcEventWeight"][:])*xsection/ftop["metadata"]["nEventsProcessed"]))
-            ftop.close()
-
-        # ---
-        # --- CUTS
-        if bool(args.masscut) == True:
-            massCut = (fat_jet_tree_top['mass']>=75e3) & (fat_jet_tree_top['mass']<=145e3)
-            subjet_1_top = subjet_1_top[massCut]
-            subjet_2_top = subjet_2_top[massCut]
-            fat_jet_tree_top = fat_jet_tree_top[massCut]
-            weight_top = weight_top[massCut]
-        print "check size (top): %d, %d, %d"%(len(fat_jet_tree_top),len(subjet_1_top),len(subjet_2_top))
-
-        if bool(args.ptcut) == True:
-            ptCut = (fat_jet_tree_top['pt']<3000e3) & (subjet_1_top['pt']<3000e3) & (subjet_2_top['pt']<3000e3)
-            subjet_1_top = subjet_1_top[ptCut]
-            subjet_2_top = subjet_2_top[ptCut]
-            fat_jet_tree_top = fat_jet_tree_top[ptCut]
-            weight_top = weight_top[ptCut]
-        print "check size (top): %d, %d, %d"%(len(fat_jet_tree_top),len(subjet_1_top),len(subjet_2_top))
-
-    # ---
-    dataset_sig = []
-    dataset_dijet = []
-    dataset_top = []
-
-    # --- for signal, determining labels at this stage
-    indices = []
-    for i,j in enumerate(fat_jet_tree_sig):
-        nB_1 = subjet_1_sig['GhostBHadronsFinalCount'][i]
-        nC_1 = subjet_1_sig['GhostCHadronsFinalCount'][i]
-        nB_2 = subjet_2_sig['GhostBHadronsFinalCount'][i]
-        nC_2 = subjet_2_sig['GhostCHadronsFinalCount'][i]
-        double_label = get_double_label(nB_1,nC_1,nB_2,nC_2)
-        if double_label == "bb": indices.append(i)
-
-    print "---- intermediate check:"
-    print "# signal events = %d"%len(fat_jet_tree_sig)
-    print "# dijet events = %d"%len(fat_jet_tree_dijet)
-    if bool(args.tt) == True: print "# top events = %d"%len(fat_jet_tree_top)
-
-    # ------- Extracting relevant variables for reweighting ------- #
-    # -------      eta, pt     --------- #
-    for ivar in ['pt', 'eta']:
-        dataset_sig.append( fat_jet_tree_sig[ivar] ) #1, #2
-        dataset_dijet.append( fat_jet_tree_dijet[ivar] )
-        if bool(args.tt) == True: dataset_top.append( fat_jet_tree_top[ivar] )
-
-    #weight1=fat_jet_tree['mcEventWeight']*fat_jet_tree['Cross_Section']*fat_jet_tree['Filter_ef']/ fat_jet_tree['sumOfWeights']
-    #weight_sig=fat_jet_tree_sig['mcEventWeight']/metadata_tree_sig['sumOfWeights']
-    #weight_dijet=fat_jet_tree_dijet['mcEventWeight']*xsection/metadata_tree_dijet['nEventsProcessed']
-    #if args.tt: weight_top=fat_jet_tree_top['mcEventWeight']/metadata_tree_top['sumOfWeights']
-    '''
-
+    # Load list of variable names from file
     with open(args.output + '/variables.txt', 'r') as varfile:
         var_list = varfile.read().splitlines()
+        pass
+
+    # Read in preprocessed data
+    with h5py.File(args.output + '/output_Preprocessed.h5', 'r') as h5f:
+        bbjets = h5f['arr_processed_bbjets'][:]
+        dijets = h5f['arr_processed_dijets'][:]
+        if args.ttbar:
+            ttbar = h5f['arr_processed_ttbar'][:]
+            pass
         pass
 
     # Normalise event weights
@@ -371,61 +187,49 @@ def main ():
     ttbar [:,ivar] /= np.sum(ttbar [:,ivar])
 
     # Prepare arrays
-    dataset_sig, dataset_dijet, dataset_top = list(), list(), list()
+    dataset_bbjets, dataset_dijets, dataset_ttbar = list(), list(), list()
     for var in ['fat_jet_pt', 'fat_jet_eta', 'weight']:
         ivar = var_list.index(var)
-        dataset_sig    .append( bbjets[:,ivar] ) #1, #2
-        dataset_dijet  .append( dijets[:,ivar] )
-        if args.tt:
-            dataset_top.append( ttbar [:,ivar] )
+        dataset_bbjets   .append( bbjets[:,ivar] )
+        dataset_dijets   .append( dijets[:,ivar] )
+        if args.ttbar:
+            dataset_ttbar.append( ttbar [:,ivar] )
             pass
         pass
 
+    # Convert to numpy.arrays in the expected format
+    array_bbjets    = np.rot90(np.array(dataset_bbjets))
+    array_dijets    = np.rot90(np.array(dataset_dijets))
+    if args.ttbar:
+        array_ttbar = np.rot90(np.array(dataset_ttbar))
+        pass
 
-    '''
-    # alt2 ->  this is commented out
-    weight_sig=weight_sig[:]/np.sum(weight_sig)
-    weight_dijet=weight_dijet[:]/np.sum(weight_dijet)
-    if bool(args.tt) == True: weight_top=weight_top[:]/np.sum(weight_top)
-
-    dataset_sig.append(weight_sig)
-    dataset_dijet.append(weight_dijet)
-    if bool(args.tt) == True: dataset_top.append(weight_top)
-    '''
-    flipped_bb = np.rot90(np.array(dataset_sig))
-    flipped_dataset_dijet = np.rot90(np.array(dataset_dijet))
-    if bool(args.tt) == True: flipped_dataset_top = np.rot90(np.array(dataset_top))
-    '''
-    # ------- Extracting bb only (signal) ------- #
-    filter_bb = np.array(indices)
-    flipped_bb = flipped_dataset_sig[filter_bb]
-
-    print "--- stats check"
-    print "# bb = %d"%len(flipped_bb)
-    print "# dijets = %d"%len(flipped_dataset_dijet)
-    if bool(args.tt) == True: print "# top = %d"%len(flipped_dataset_top)
-    '''
-    print "((()))",flipped_dataset_dijet.shape
-
-    if args.pt_flat==True:
-        print "-> p_{T} flat reweighting"
-        ptbins = np.linspace(250e3,6000e3,50)
-        bbWeights = ptflat_reweight(flipped_bb, flipped_bb,ptbins=ptbins)
-        dijetWeights = ptflat_reweight(flipped_bb, flipped_dataset_dijet,ptbins=ptbins)
-        if bool(args.tt) == True: ttbarWeights = ptflat_reweight(flipped_bb,flipped_dataset_top,ptbins=ptbins)
+    # Perform re-weighting
+    if args.pt_flat:
+        print "Re-weighting to flat pT spectrum"
+        bins_pt = np.linspace(250e3,6000e3,50)
+        weights_bbjets    = ptflat_reweight(array_bbjets, array_bbjets, bins_pt=bins_pt)
+        weights_dijets    = ptflat_reweight(array_bbjets, array_dijets, bins_pt=bins_pt)
+        if args.ttbar:
+            weights_ttbar = ptflat_reweight(array_bbjets, array_ttbar,  bins_pt=bins_pt)
+            pass
     else:
-        dijetWeights = ptEta_reweight(flipped_bb,flipped_dataset_dijet)
-        bbWeights = ptEta_reweight(flipped_bb,flipped_bb)
-        if bool(args.tt) == True: ttbarWeights = ptEta_reweight(flipped_bb,flipped_dataset_top)
-    print len(bbWeights), ")))"
-    print len(dijetWeights), ")))"
-    print len(ttbarWeights), ")))"
-    h5f = h5py.File(args.output+'/Weight_'+str(args.pt_flat)+'%s.h5'%name_tag, 'w')
-    h5f.create_dataset('bb_vs_bb_weights', data=bbWeights)
-    h5f.create_dataset('dijet_vs_bb_weights', data=dijetWeights)
-    if bool(args.tt) == True: h5f.create_dataset('ttbar_vs_bb_weights', data=ttbarWeights)
+        print "Re-weighting in (pT, eta)"
+        weights_bbjets    = ptEta_reweight(array_bbjets, array_bbjets)
+        weights_dijets    = ptEta_reweight(array_bbjets, array_dijets)
+        if args.ttbar:
+            weights_ttbar = ptEta_reweight(array_bbjets, array_ttbar)
+            pass
+        pass
 
-    h5f.close()
+    # Save re-weighting weights to file
+    with h5py.File('{}/Weight_{:d}{}.h5'.format(args.output, args.pt_flat, args.nametag), 'w') as h5f:
+        h5f.create_dataset('bb_vs_bb_weights', data=weights_bbjets)
+        h5f.create_dataset('dijet_vs_bb_weights', data=weights_dijets)
+        if args.ttbar:
+            h5f.create_dataset('ttbar_vs_bb_weights', data=weights_ttbar)
+            pass
+        pass
     return
 
 

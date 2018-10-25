@@ -1,6 +1,14 @@
+'''
+This the *third* script in the data preparation pipeline for the X->bb tagger
+   preprocessing.py
+   reweighting.py
+ > preparing.py
+'''
+
 # Import(s)
 import h5py
 import numpy as np
+
 import utilities.variable_info as variable_info
 from utilities.common import *
 
@@ -10,33 +18,30 @@ def main ():
   # Parse command-line arguments
   args = parse_args()
 
-  # Definitions(?)
-  name_tag = ''
-
   # Read data from pre-processed HDF5 file
-  with h5py.File(args.output + '/output_Preprocessed%s.h5' % name_tag, 'r') as h5f:
+  with h5py.File('{}/output_Preprocessed{}.h5'.format(args.output, args.nametag), 'r') as h5f:
       bbjets = h5f['arr_processed_bbjets'][:]
       dijets = h5f['arr_processed_dijets'][:]
-      if args.tt:
+      if args.ttbar:
           ttbar = h5f['arr_processed_ttbar'][:]
           pass
       pass
 
   # Read re-weighting weights from HDF5 file
-  with h5py.File(args.output+'/Weight_0%s.h5'%name_tag, 'r') as wf:
+  with h5py.File('{}/Weight_0{}.h5'.format(args.output, args.nametag), 'r') as wf:
       bb_weight = wf['bb_vs_bb_weights'][:]
       print("this is the shape of bb_weight", bb_weight.shape)
       di_weight = wf['dijet_vs_bb_weights'][:]
       #print(di_weight)
       print("this is the shape of di_weight", di_weight.shape)
-      if args.tt:
+      if args.ttbar:
           tt_weight = wf['ttbar_vs_bb_weights'][:]
           pass
       print("this is the shape of tt_weight", tt_weight.shape)
       print "inesochoa 0: this should be a weight = ",di_weight[:]
       pass
 
-  if args.tt:
+  if args.ttbar:
     # features
     X = np.concatenate((bbjets, dijets, ttbar))
     # classes # assuming dijet and ttbar are same (1)
@@ -53,22 +58,13 @@ def main ():
     #print X_weights[:]
     pas
 
+  # Shuffle arrays
+  indices = np.arange(X.shape[0], dtype=int)
+  np.random.shuffle(indices)
 
-  # put everything together and shuffle
-  Y.shape = (Y.shape[0],1)
-  X_weights.shape = (X_weights.shape[0],1)
-  print "before reshufling"
-  #print X[:]
-  print(X.shape)
-  #print Y[:]
-  print(Y.shape)
-  #print X_weights[:]
-  print(X_weights.shape)
-  Z = np.hstack((X, Y, X_weights))
-  print "this is Z:"
-  print Z
-
-  np.random.shuffle(Z)
+  X         = X[indices]
+  Y         = Y[indices]
+  X_weights = X_weights[indices]
 
   # OK, need to do some manipulation here... looking at variables.txt for this
   varfile = open(args.output+'/variables.txt','r')
@@ -84,18 +80,6 @@ def main ():
   frac = [0.8,0.9]
   n_total   = len(var_list)
   n_feature = len(var_list[ini_feature:])
-
-  # this is hard-coded, but should *not* change: n_total covers all features and actual variables, while the other two come from Y and X_weights (see above definition for Z)
-  X=Z[:,:n_total]
-  Y=Z[:,n_total]
-  X_weights=Z[:,n_total+1]
-
-  print "after reshufling"
-  print X[:]
-  print Y[:]
-  print X_weights[:]
-  for el in X_weights[:]:
-    print "%0.3f"%el
 
   # label
   arr_label = X[:,var_list.index("label")]
@@ -179,11 +163,11 @@ def main ():
   # original samples
   h5f.create_dataset('dijet', data=dijets)
   h5f.create_dataset('bbjet', data=bbjets)
-  if args.tt: h5f.create_dataset('ttbar', data=ttbar)
+  if args.ttbar: h5f.create_dataset('ttbar', data=ttbar)
   # and weights
   h5f.create_dataset('dijet_weight', data=di_weight)
   h5f.create_dataset('bbjet_weight', data=bb_weight)
-  if args.tt: h5f.create_dataset('ttjet_weight', data=tt_weight)
+  if args.ttbar: h5f.create_dataset('ttjet_weight', data=tt_weight)
   h5f.create_dataset('mean', data=mean)
   h5f.create_dataset('std', data=std)
   # jet / event info
@@ -228,11 +212,11 @@ def main ():
   # original samples
   h5f.create_dataset('dijet', data=dijets)
   h5f.create_dataset('bbjet', data=bbjets)
-  if args.tt: h5f.create_dataset('ttbar', data=ttbar)
+  if args.ttbar: h5f.create_dataset('ttbar', data=ttbar)
   # and weights
   h5f.create_dataset('dijet_weight', data=di_weight)
   h5f.create_dataset('bbjet_weight', data=bb_weight)
-  if args.tt: h5f.create_dataset('ttjet_weight', data=tt_weight)
+  if args.ttbar: h5f.create_dataset('ttjet_weight', data=tt_weight)
   h5f.create_dataset('mean', data=mean)
   h5f.create_dataset('std', data=std)
   # jet / event info
@@ -250,23 +234,6 @@ def main ():
   h5f.create_dataset('arr_label_test', data=arr_label_test)
   h5f.close()
   print'this is the part where h5 prepared sample is created'
-
-
-def MakeNan(jetVec,var) :
-  jetVec_new=np.where(np.isnan(jetVec),variable_info.default_values[var], jetVec )
-  return jetVec_new
-
-def FindCheck(jetVec, var) :
-  default_location = np.where(jetVec == variable_info.default_values[var])
-  jet_feature_check = np.zeros(len(jetVec))
-  jet_feature_check[default_location] = 1
-  return jet_feature_check
-
-def Mean_Scale(jetVec, var) :
-  jetVec=np.array(jetVec)
-  # ----- removing the defaults to mean ----- #
-  jetVec[np.where(jetVec==variable_info.default_values[var])] = np.mean(jetVec[np.where(jetVec!=variable_info.default_values[var])])
-  return jetVec
 
 
 # Main function call.
