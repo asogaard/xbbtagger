@@ -13,7 +13,7 @@ import variable_info
 def parse_args():
     parser = argparse.ArgumentParser(description=sys.__doc__)
     parser.add_argument('-sj', '--subjet', default="subjet_ExKt2", help="Subjet collection.")
-    parser.add_argument('--scaling', default=True, type=bool, help="Perform scaling.")  
+    parser.add_argument('--scaling', default=True, type=bool, help="Perform scaling.")
     parser.add_argument('-o', '--output', help="Output folder where to store h5.")
     parser.add_argument('-m', '--masscut', type=bool, default=False, help="Apply Higgs mass cut.")
     parser.add_argument('-pt', '--ptcut', type=int, default=True, help="Apply maximum pT cut on fat-jet.")
@@ -32,8 +32,12 @@ def prepare_sample(bbjets, dijets, ttbar):
 
   wf = h5py.File(args.output+'/Weight_0%s.h5'%name_tag, 'r')
   bb_weight= wf['bb_vs_bb_weights'][:]
+  print("this is the shape of bb_weight", bb_weight.shape)
   di_weight= wf['dijet_vs_bb_weights'][:]
+  print(di_weight)
+  print("this is the shape of di_weight", di_weight.shape)
   if bool(args.tt) == True: tt_weight= wf['ttbar_vs_bb_weights'][:]
+  print("this is the shape of tt_weight", tt_weight.shape)
   print "inesochoa 0: this should be a weight = ",di_weight[:]
 
   if bool(args.tt) == True:
@@ -58,24 +62,27 @@ def prepare_sample(bbjets, dijets, ttbar):
   X_weights.shape = (X_weights.shape[0],1)
   print "before reshufling"
   print X[:]
+  print(X.shape)
   print Y[:]
+  print(Y.shape)
   print X_weights[:]
+  print(X_weights.shape)
   Z = np.hstack((X, Y, X_weights))
   print "this is Z:"
   print Z
 
   seed=random.randint(0,1e6)
   random.seed(seed)
-  np.random.shuffle(Z) 
+  np.random.shuffle(Z)
 
   # OK, need to do some manipulation here... looking at variables.txt for this
   varfile = open(args.output+'/variables.txt','r')
   var_list = varfile.read().splitlines()
-  varfile.close() 
+  varfile.close()
 
   #n_total = len(var_list)# - ini_feature + 1
   n_feature = len(var_list[ini_feature:])
-  
+
   # this is hard-coded, but should *not* change: n_total covers all features and actual variables, while the other two come from Y and X_weights (see above definition for Z)
   X=Z[:,:n_total]
   Y=Z[:,n_total]
@@ -105,14 +112,14 @@ def prepare_sample(bbjets, dijets, ttbar):
   # features
   X_train = X[:int(frac[0]*X.shape[0]), ]
   X_test = X[int(frac[0]*X.shape[0])+1: int(frac[1]*X.shape[0]), ]
-  X_val = X[int(frac[1]*X.shape[0])+1:, ]   
+  X_val = X[int(frac[1]*X.shape[0])+1:, ]
   print "inesochoa 1: this should pT = ",X_train[:,0]
   print "inesochoa 1: this should pT = ",X_test[:,0]
   print "inesochoa 1: this should pT = ",X_val[:,0]
 
   # weights
   X_weights_train = X_weights[:int(frac[0]*X_weights.shape[0])]
-  X_weights_test = X_weights[int(frac[0]*X_weights.shape[0])+1:int(frac[1]*X_weights.shape[0])] 
+  X_weights_test = X_weights[int(frac[0]*X_weights.shape[0])+1:int(frac[1]*X_weights.shape[0])]
   X_weights_val = X_weights[int(frac[1]*X_weights.shape[0])+1:]
 
   # classes
@@ -127,7 +134,7 @@ def prepare_sample(bbjets, dijets, ttbar):
   print "inesochoa 1: and its prediction = ",Y_val[:]
 
   # fat-jet pt
-  arr_jet_pt_train = arr_jet_pt[:int(frac[0]*arr_jet_pt.shape[0])] 
+  arr_jet_pt_train = arr_jet_pt[:int(frac[0]*arr_jet_pt.shape[0])]
   arr_jet_pt_test = arr_jet_pt[int(frac[0]*arr_jet_pt.shape[0])+1:int(frac[1]*arr_jet_pt.shape[0])]
   arr_jet_pt_val = arr_jet_pt[int(frac[1]*arr_jet_pt.shape[0])+1:]
 
@@ -144,9 +151,9 @@ def prepare_sample(bbjets, dijets, ttbar):
   # baseline tagger
   arr_baseline_tagger_train = arr_baseline_tagger[:int(frac[0]*arr_baseline_tagger.shape[0]), ]
   arr_baseline_tagger_test = arr_baseline_tagger[int(frac[0]*arr_baseline_tagger.shape[0])+1: int(frac[1]*arr_baseline_tagger.shape[0]), ]
-  arr_baseline_tagger_val = arr_baseline_tagger[int(frac[1]*arr_baseline_tagger.shape[0])+1:, ]   
+  arr_baseline_tagger_val = arr_baseline_tagger[int(frac[1]*arr_baseline_tagger.shape[0])+1:, ]
 
-  
+
   # --- finally, prepare output h5
   mean=np.mean(X_train, axis=0)
   std=np.std(X_train, axis=0)
@@ -191,14 +198,14 @@ def prepare_sample(bbjets, dijets, ttbar):
   h5f.create_dataset('arr_label_val', data=arr_label_val)
   h5f.create_dataset('arr_label_test', data=arr_label_test)
   h5f.close()
-   
+
   # --- scaling, prepare output h5
-  for i in range(n_feature-1): 
+  for i in range(n_feature-1):
     if (std[i]!=0 and bool(args.scaling)):
       X_train[:,i]=(X_train[:,i]-mean[i])/std[i]
       X_test[:,i]=(X_test[:,i]-mean[i])/std[i]
       X_val[:,i]=(X_val[:,i]-mean[i])/std[i]
-       
+
   # --- scaled output as well:
   h5f = h5py.File(args.output+'/prepared_sample_v2.h5', 'w')
   # features
@@ -239,8 +246,9 @@ def prepare_sample(bbjets, dijets, ttbar):
   h5f.create_dataset('arr_label_train', data=arr_label_train)
   h5f.create_dataset('arr_label_val', data=arr_label_val)
   h5f.create_dataset('arr_label_test', data=arr_label_test)
-  h5f.close() 
-  
+  h5f.close()
+  print'this is the part where h5 prepared sample is created'
+
 
 def MakeNan(jetVec,var) :
   jetVec_new=np.where(np.isnan(jetVec),variable_info.default_values[var], jetVec )
@@ -256,7 +264,7 @@ def Mean_Scale(jetVec, var) :
   jetVec=np.array(jetVec)
   # ----- removing the defaults to mean ----- #
   jetVec[np.where(jetVec==variable_info.default_values[var])] = np.mean(jetVec[np.where(jetVec!=variable_info.default_values[var])])
-  return jetVec 
+  return jetVec
 
 def extract_info():#sigfile,dijet_path,ttbarfile):
 
@@ -271,7 +279,7 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
   file_sig = []
   signal_samples = open(sigtxt,"r").read().splitlines()
   for sample in signal_samples:
-    content = open(input_dir+'/lists/list_'+sample+".txt","r").read().splitlines()
+    content = open(input_dir+sample+".txt","r").read().splitlines()
     file_sig.append(content[0].rstrip("\n").replace(" ", "")) #only using one file
 
   l_fatjet = []
@@ -279,7 +287,7 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
   l_subjet2 = []
   print "...looping over a total of %d files..."%len(file_sig)
   for f in file_sig:
-    fatjet_data_sig_tmp = pd.read_hdf(f,"fat_jet") 
+    fatjet_data_sig_tmp = pd.read_hdf(f,"fat_jet")
     subjet_1_sig_tmp = pd.read_hdf(f,subjet_collection+"_1")
     subjet_2_sig_tmp = pd.read_hdf(f,subjet_collection+"_2")
     l_fatjet.append(fatjet_data_sig_tmp)
@@ -289,7 +297,7 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
   fatjet_data_sig = pd.concat(l_fatjet,ignore_index=True)
   subjet_1_sig = pd.concat(l_subjet1,ignore_index=True)
   subjet_2_sig = pd.concat(l_subjet2,ignore_index=True)
-  
+
   print "Total number of signal events before mass cut: %d"%len(fatjet_data_sig)
   if bool(args.masscut) == True:
     massCut = (fatjet_data_sig['mass']>=75e3) & (fatjet_data_sig['mass']<=145e3)
@@ -314,16 +322,16 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
 
   print "...looping over a total of %d files..."%len(file_dijet)
   for f in file_dijet:
-    fatjet_data_dijet_tmp = pd.read_hdf(input_dir+"/"+f,"fat_jet") 
-    subjet_1_dijet_tmp = pd.read_hdf(input_dir+"/"+f,subjet_collection+"_1")
-    subjet_2_dijet_tmp = pd.read_hdf(input_dir+"/"+f,subjet_collection+"_2")
+    fatjet_data_dijet_tmp = pd.read_hdf(input_dir+f,"fat_jet",start=0).loc[:50,:]
+    subjet_1_dijet_tmp = pd.read_hdf(input_dir+f,subjet_collection+"_1",start=0).loc[:50,:]
+    subjet_2_dijet_tmp = pd.read_hdf(input_dir+f,subjet_collection+"_2",start=0).loc[:50,:]
     l_fatjet.append(fatjet_data_dijet_tmp)
     l_subjet1.append(subjet_1_dijet_tmp)
     l_subjet2.append(subjet_2_dijet_tmp)
 
   fatjet_data_dijet = pd.concat(l_fatjet,ignore_index=True)#,verify_integrity=True)
   subjet_1_dijet = pd.concat(l_subjet1,ignore_index=True)#,verify_integrity=True)
-  subjet_2_dijet = pd.concat(l_subjet2,ignore_index=True)#,verify_integrity=True) 
+  subjet_2_dijet = pd.concat(l_subjet2,ignore_index=True)#,verify_integrity=True)
 
   print "Total number of dijet events before mass cut: %d"%len(fatjet_data_dijet)
   if bool(args.masscut) == True:
@@ -346,7 +354,7 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
     file_top = []
     topnal_samples = open(toptxt,"r").read().splitlines()
     for sample in topnal_samples:
-      content = open(input_dir+'/lists/list_'+sample+".txt","r").read().splitlines()
+      content = open(input_dir+sample+".txt","r").read().splitlines()
       file_top.append(content[0].rstrip("\n").replace(" ", "")) #only using one file
 
     l_fatjet = []
@@ -354,7 +362,7 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
     l_subjet2 = []
     print "...looping over a total of %d files..."%len(file_top)
     for f in file_top:
-      fatjet_data_top_tmp = pd.read_hdf(f,"fat_jet") 
+      fatjet_data_top_tmp = pd.read_hdf(f,"fat_jet")
       subjet_1_top_tmp = pd.read_hdf(f,subjet_collection+"_1")
       subjet_2_top_tmp = pd.read_hdf(f,subjet_collection+"_2")
       l_fatjet.append(fatjet_data_top_tmp)
@@ -364,7 +372,7 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
     fatjet_data_top = pd.concat(l_fatjet,ignore_index=True)
     subjet_1_top = pd.concat(l_subjet1,ignore_index=True)
     subjet_2_top = pd.concat(l_subjet2,ignore_index=True)
-    
+
     print "Total number of top events before mass cut: %d"%len(fatjet_data_top)
     if bool(args.masscut) == True:
       massCut = (fatjet_data_top['mass']>=75e3) & (fatjet_data_top['mass']<=145e3)
@@ -428,10 +436,10 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
   # append background events
   mini_data=pd.concat([mini_data, fatjet_data_dijet])
   if bool(args.tt) == True: mini_data=pd.concat([mini_data, fatjet_data_top])
-  
+
   mini_data_sj1=pd.concat([mini_data_sj1, subjet_1_dijet])
   if bool(args.tt) == True: mini_data_sj1=pd.concat([mini_data_sj1, subjet_1_top])
-  
+
   mini_data_sj2=pd.concat([mini_data_sj2, subjet_2_dijet])
   if bool(args.tt) == True: mini_data_sj2=pd.concat([mini_data_sj2, subjet_2_top])
 
@@ -446,17 +454,17 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
 
   # Start filling dataset list below:
   # ------- label --------- #
-  dataset.append( mini_data["label"] ) 
+  dataset.append( mini_data["label"] )
   varfile.write("label\n")
 
   # ------- fat-jet info --------- #
   for ivar in variable_info.fat_jet_vars:
     if "pt" in ivar or "eta" in ivar: dataset.append( mini_data[ivar]) #no scaling to the mean for these two => but there's no mean scaling here... only for NaN!
-    else: dataset.append(Mean_Scale( mini_data[ivar], ivar) ) 
+    else: dataset.append(Mean_Scale( mini_data[ivar], ivar) )
     varfile.write("fat_jet_%s\n"%ivar)
 
   # ------- MV2c10 variables --------- #
-  for ivar in variable_info.default_vars: 
+  for ivar in variable_info.default_vars:
     # subjet 1
     dataset.append( mini_data_sj1[ivar] )
     varfile.write( subjet_collection+"_1_%s\n"%ivar)
@@ -547,7 +555,7 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
     dataset.append( ivar_nan_check )
     varfile.write(subjet_collection+"_2_"+ivar+'\n')
     varfile.write(subjet_collection+"_2_"+ivar+"_nan_check\n")
-      
+
     del ivar_nan; del ivar_nan_check;
   gc.collect()
 
@@ -555,11 +563,11 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
   flipped_dataset = np.rot90(np.array(dataset))
 
   print ('Total Var = ' + str(len(dataset)))
-  
+
   bbjets = flipped_dataset[flipped_dataset[:,0]==label_dict["H_bb"]]
   dijets = flipped_dataset[(flipped_dataset[:,0]!=label_dict["H_bb"])&(flipped_dataset[:,0]!=label_dict["top"])]
   if bool(args.tt) == True: ttbar = flipped_dataset[(flipped_dataset[:,0]==label_dict["top"])]
-  
+
   print ( "Stats: ")
   print ( "# signal = ", len(bbjets))
   print ( "# dijets = ", len(dijets))
@@ -568,11 +576,11 @@ def extract_info():#sigfile,dijet_path,ttbarfile):
   h5f = h5py.File(args.output+'/output_Preprocessed%s.h5'%name_tag, 'w')
   h5f.create_dataset('arr_processed_bbjets', data=bbjets)
   h5f.create_dataset('arr_processed_dijets', data=dijets)
-  if bool(args.tt) == True: h5f.create_dataset('arr_processed_ttbar', data=ttbar) 
+  if bool(args.tt) == True: h5f.create_dataset('arr_processed_ttbar', data=ttbar)
 
   h5f.close()
   varfile.close()
-  
+
 #------------------------------
 if __name__ == "__main__" :
 
@@ -583,12 +591,12 @@ if __name__ == "__main__" :
 
   # need to combine dijet datasets first
   global input_dir, sigtxt, toptxt, dijettxt
-  input_dir = "/data/users/miochoa/doubleTagger/samples/august-datasets/"
+  input_dir = "/eos/user/e/evillhau/new_double_b_tagger_ines/double-tagger-fun/Preprocessing/"
   sigtxt = "signal.txt"
   dijettxt = "dijet.txt"
   toptxt = "top.txt"
 
-  # start by extracting information 
+  # start by extracting information
   extract_info()
 
   # extra definitions for arrays
@@ -605,18 +613,20 @@ if __name__ == "__main__" :
   n_total = len(var_list)
   n_feature = len(var_list[ini_feature:])
   print 'total number of variables (not only features) = %d'%n_total
-  print 'feature index = %d + %d + %d = %d'%(n_mv2c,n_fatjet,n_label,ini_feature)  
-  print '-> total number of features = %d'%(n_feature)  
+  print 'feature index = %d + %d + %d = %d'%(n_mv2c,n_fatjet,n_label,ini_feature)
+  print '-> total number of features = %d'%(n_feature)
 
 
   # then send the h5 file to prepare_samples
   h5f = h5py.File(args.output+'/output_Preprocessed%s.h5'%name_tag, 'r')
   bbjets=h5f['arr_processed_bbjets'][:]
   dijets=h5f['arr_processed_dijets'][:]
+  #print(len(h5f['arr_processed_dijets']))
+  #exit()
   if bool(args.tt) == True: ttbar=h5f['arr_processed_ttbar'][:]
   else: ttbar=bbjets #send dummy
   prepare_sample(bbjets, dijets, ttbar)
 
   h5f.close()
-  
+
 

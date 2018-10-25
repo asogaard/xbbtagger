@@ -1,7 +1,7 @@
 # ----------------------------------------------------
 # Ines Ochoa, August 2018
 # Based on Jue Chen's scripts
-# 
+#
 # Perform pT / eta reweighting
 # Note: currently reweighting signal to background...
 # ----------------------------------------------------
@@ -86,9 +86,9 @@ def ptflat_reweight(num_array,denom_array,ptbins=[],etabins=[]):
     a = h_num
     b = h_denom
     print(np.shape(a))
-   
+
     mean=np.divide(np.sum(a,axis=0),np.count_nonzero(b,axis=0))
-   
+
     pt=np.ones(len(a))
     pt.shape=(len(a),1)
     mean.shape=(len(a[0]),1)
@@ -96,10 +96,10 @@ def ptflat_reweight(num_array,denom_array,ptbins=[],etabins=[]):
     weight=np.divide(mean,b)
     weightHist=weight
     weightDict = makeBinValueDict(weightHist,xedges, yedges)
- 
+
 
     weightarray = []
-    
+
     for row in denom_array:
         xval = row[0]
         yval = row[1]
@@ -111,7 +111,7 @@ def ptflat_reweight(num_array,denom_array,ptbins=[],etabins=[]):
 #------------------------------------------------------------
 def ptEta_reweight(num_array,denom_array,ptbins=[],etabins=[]):
     #the inputs should be 2 columns, of the two variables used for reweighting
-    
+
     ptarray_num = num_array[:,0].astype(np.float)
     etaarray_num = num_array[:,1].astype(np.float)
     weight_num = num_array[:,2].astype(np.float)
@@ -119,7 +119,7 @@ def ptEta_reweight(num_array,denom_array,ptbins=[],etabins=[]):
     ptarray_denom = denom_array[:,0].astype(np.float)
     etaarray_denom = denom_array[:,1].astype(np.float)
     weight_denom = denom_array[:,2].astype(np.float)
-    
+
     if len(ptbins)==0:
         ptbins = np.linspace(ptarray_num.min(),ptarray_num.max(),51)
     if len(etabins)==0:
@@ -135,7 +135,7 @@ def ptEta_reweight(num_array,denom_array,ptbins=[],etabins=[]):
                 h_denom[xi][yi] = 1
 
     weightHist = np.divide(h_num,h_denom)
-    
+
 
     weightDict = makeBinValueDict(weightHist,xedges, yedges)
     weightarray = []
@@ -160,7 +160,7 @@ def produce_weights():
     # ---- load the input data file ----- #
     # --- signal
     print "Preparing signal samples..."
-    signal_samples = open(sigtxt,"r").read().splitlines() 
+    signal_samples = open(sigtxt,"r").read().splitlines()
     file_sig = []
     dsid_list = []
     #fsig = h5py.File('/data/users/miochoa/doubleTagger/samples/user.dguest.301503.hbbTraining.e3820_e5984_s3126_r10201_r10210_p3596.p3_output.h5/user.dguest.14784696._000001.output.h5', 'r')
@@ -169,44 +169,44 @@ def produce_weights():
     #subjet_2_sig = np.array(fsig[subjet_collection+"_2"][:])
     #metadata_tree_sig = np.array(fsig['metadata'])
     for sample in signal_samples:
-        content = open(input_dir+'/lists/list_'+sample+".txt","r").read().splitlines()
+        content = open(input_dir+sample+".txt","r").read().splitlines()
         file_sig.append(content[0].rstrip("\n").replace(" ", "")) #only using one file
         dsid_list.append(sample.split(".")[2])
 
     print "Found %d signal samples to combine."%len(file_sig)
     # get shape from first file
     fsig = h5py.File(file_sig[0], 'r')
-    
-    fat_jet_tree_sig = np.array(fsig["fat_jet"][:])
-    subjet_1_sig = np.array(fsig[subjet_collection+"_1"][:])
-    subjet_2_sig = np.array(fsig[subjet_collection+"_2"][:])
+    print(fsig["fat_jet"])
+    fat_jet_tree_sig = np.array(fsig["fat_jet"]['eta','pt','mass','GhostHBosonsCount'])
+    subjet_1_sig = np.array(fsig[subjet_collection+"_1"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
+    subjet_2_sig = np.array(fsig[subjet_collection+"_2"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
     dsid = dsid_list[0]
     xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
     weight_sig = np.array(fsig["fat_jet"]["mcEventWeight"][:])*xsection/fsig["metadata"]["nEventsProcessed"]
     fsig.close()
-    
+
     # loop over remaining ones
     #for i,f in enumerate(file_sig[1:]):
     for i in range(1,len(file_sig)):
         dsid = dsid_list[i]
         fsig = h5py.File(file_sig[i], 'r')
-        fat_jet_tree_sig = np.hstack((fat_jet_tree_sig,np.array(fsig["fat_jet"][:])))
-        subjet_1_sig = np.hstack((subjet_1_sig,np.array(fsig[subjet_collection+"_1"][:])))
-        subjet_2_sig = np.hstack((subjet_2_sig,np.array(fsig[subjet_collection+"_2"][:])))
+        fat_jet_tree_sig = np.hstack((fat_jet_tree_sig,np.array(fsig["fat_jet"]['eta','pt','mass','GhostHBosonsCount'])))
+        subjet_1_sig = np.hstack((subjet_1_sig,np.array(fsig[subjet_collection+"_1"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
+        subjet_2_sig = np.hstack((subjet_2_sig,np.array(fsig[subjet_collection+"_2"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
         xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
         weight_sig = np.hstack((weight_sig,np.array(fsig["fat_jet"]["mcEventWeight"][:])*xsection/fsig["metadata"]["nEventsProcessed"]))
         fsig.close()
     print "check size (before): %d, %d, %d"%(len(fat_jet_tree_sig),len(subjet_1_sig),len(subjet_2_sig))
 
-    # ---     
+    # ---
     # --- Higgs boson matching for signal -> need to do it for all collections
     subjet_1_sig = np.extract(fat_jet_tree_sig['GhostHBosonsCount']>=1,subjet_1_sig)
     subjet_2_sig = np.extract(fat_jet_tree_sig['GhostHBosonsCount']>=1,subjet_2_sig)
     weight_sig = np.extract(fat_jet_tree_sig['GhostHBosonsCount']>=1,weight_sig)
-    fat_jet_tree_sig = np.extract(fat_jet_tree_sig['GhostHBosonsCount']>=1,fat_jet_tree_sig) 
+    fat_jet_tree_sig = np.extract(fat_jet_tree_sig['GhostHBosonsCount']>=1,fat_jet_tree_sig)
     print "check size (after 1): %d, %d, %d"%(len(fat_jet_tree_sig),len(subjet_1_sig),len(subjet_2_sig))
 
-    # ---     
+    # ---
     # --- CUTS
     if bool(args.masscut) == True:
         massCut = (fat_jet_tree_sig['mass']>=75e3) & (fat_jet_tree_sig['mass']<=145e3)
@@ -215,7 +215,7 @@ def produce_weights():
         fat_jet_tree_sig = fat_jet_tree_sig[massCut]
         weight_sig =weight_sig[massCut]
         print "check size (after 2): %d, %d, %d"%(len(fat_jet_tree_sig),len(subjet_1_sig),len(subjet_2_sig))
-    
+
     if bool(args.ptcut) == True:
         ptCut = (fat_jet_tree_sig['pt']<3000e3) & (subjet_1_sig['pt']<3000e3) & (subjet_2_sig['pt']<3000e3)
         subjet_1_sig = subjet_1_sig[ptCut]
@@ -223,33 +223,33 @@ def produce_weights():
         fat_jet_tree_sig = fat_jet_tree_sig[ptCut]
         weight_sig = weight_sig[ptCut]
     print "check size (after 3): %d, %d, %d"%(len(fat_jet_tree_sig),len(subjet_1_sig),len(subjet_2_sig))
-    # --- 
+    # ---
 
     # --- dijet
     print "Preparing dijet samples..."
     file_dijet = open(dijettxt,"r").read().splitlines()
     # get shape from first file
-    fdijet = h5py.File(input_dir+'/'+file_dijet[0], 'r')
-    fat_jet_tree_dijet = np.array(fdijet["fat_jet"][:])
-    subjet_1_dijet = np.array(fdijet[subjet_collection+"_1"][:])
-    subjet_2_dijet = np.array(fdijet[subjet_collection+"_2"][:])
+    fdijet = h5py.File(input_dir+file_dijet[0], 'r')
+    fat_jet_tree_dijet = np.array(fdijet["fat_jet"][:50,'eta','pt','mass','GhostHBosonsCount'])
+    subjet_1_dijet = np.array(fdijet[subjet_collection+"_1"][:50,'eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
+    subjet_2_dijet = np.array(fdijet[subjet_collection+"_2"][:50,'eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
     dsid = file_dijet[0].split(".")[2]
     xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
-    weight_dijet = np.array(fdijet["fat_jet"]["mcEventWeight"][:])*xsection/fdijet["metadata"]["nEventsProcessed"]
+    weight_dijet = np.array(fdijet["fat_jet"][:50,"mcEventWeight"])*xsection/fdijet["metadata"]["nEventsProcessed"]
     fdijet.close()
-    
+
     # loop over remaining ones
     for f in file_dijet[1:]:
         dsid = f.split(".")[2]
-        fdijet = h5py.File(input_dir+'/'+f, 'r')
-        fat_jet_tree_dijet = np.hstack((fat_jet_tree_dijet,np.array(fdijet["fat_jet"][:])))
-        subjet_1_dijet = np.hstack((subjet_1_dijet,np.array(fdijet[subjet_collection+"_1"][:])))
-        subjet_2_dijet = np.hstack((subjet_2_dijet,np.array(fdijet[subjet_collection+"_2"][:])))
+        fdijet = h5py.File(input_dir+f, 'r')
+        fat_jet_tree_dijet = np.hstack((fat_jet_tree_dijet,np.array(fdijet["fat_jet"][:50,'eta','pt','mass','GhostHBosonsCount'])))
+        subjet_1_dijet = np.hstack((subjet_1_dijet,np.array(fdijet[subjet_collection+"_1"][:50,'eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
+        subjet_2_dijet = np.hstack((subjet_2_dijet,np.array(fdijet[subjet_collection+"_2"][:50,'eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
         xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
-        weight_dijet = np.hstack((weight_dijet,np.array(fdijet["fat_jet"]["mcEventWeight"][:])*xsection/fdijet["metadata"]["nEventsProcessed"]))
+        weight_dijet = np.hstack((weight_dijet,np.array(fdijet["fat_jet"][:50,"mcEventWeight"])*xsection/fdijet["metadata"]["nEventsProcessed"]))
         fdijet.close()
 
-    # ---     
+    # ---
     # --- CUTS
     if bool(args.masscut) == True:
         massCut = (fat_jet_tree_dijet['mass']>=75e3) & (fat_jet_tree_dijet['mass']<=145e3)
@@ -258,7 +258,7 @@ def produce_weights():
         fat_jet_tree_dijet = fat_jet_tree_dijet[massCut]
         weight_dijet = weight_dijet[massCut]
     print "check size (dijet): %d, %d, %d"%(len(fat_jet_tree_dijet),len(subjet_1_dijet),len(subjet_2_dijet))
-    
+
     if bool(args.ptcut) == True:
         ptCut = (fat_jet_tree_dijet['pt']<3000e3) & (subjet_1_dijet['pt']<3000e3) & (subjet_2_dijet['pt']<3000e3)
         subjet_1_dijet = subjet_1_dijet[ptCut]
@@ -267,10 +267,10 @@ def produce_weights():
         weight_dijet = weight_dijet[ptCut]
     print "check size (dijet): %d, %d, %d"%(len(fat_jet_tree_dijet),len(subjet_1_dijet),len(subjet_2_dijet))
 
-    # --- top 
+    # --- top
     if bool(args.tt) == True:
         print "Preparing top samples..."
-        top_samples = open(toptxt,"r").read().splitlines() 
+        top_samples = open(toptxt,"r").read().splitlines()
         file_top = []
         dsid_list = []
         #fsig = h5py.File('/data/users/miochoa/doubleTagger/samples/user.dguest.301503.hbbTraining.e3820_e5984_s3126_r10201_r10210_p3596.p3_output.h5/user.dguest.14784696._000001.output.h5', 'r')
@@ -279,16 +279,16 @@ def produce_weights():
         #subjet_2_sig = np.array(fsig[subjet_collection+"_2"][:])
         #metadata_tree_sig = np.array(fsig['metadata'])
         for sample in top_samples:
-            content = open(input_dir+'/lists/list_'+sample+".txt","r").read().splitlines()
+            content = open(input_dir+sample+".txt","r").read().splitlines()
             file_top.append(content[0].rstrip("\n").replace(" ", "")) #only using one file
             dsid_list.append(sample.split(".")[2])
 
         print "Found %d top samples to combine."%len(file_sig)
         # get shape from first file
         ftop = h5py.File(file_top[0], 'r')
-        fat_jet_tree_top = np.array(ftop["fat_jet"][:])
-        subjet_1_top = np.array(ftop[subjet_collection+"_1"][:])
-        subjet_2_top = np.array(ftop[subjet_collection+"_2"][:])
+        fat_jet_tree_top = np.array(ftop["fat_jet"]['eta','pt','mass','GhostHBosonsCount'])
+        subjet_1_top = np.array(ftop[subjet_collection+"_1"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
+        subjet_2_top = np.array(ftop[subjet_collection+"_2"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])
         dsid = dsid_list[0]
         xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
         weight_top = np.array(ftop["fat_jet"]["mcEventWeight"][:])*xsection/ftop["metadata"]["nEventsProcessed"]
@@ -303,14 +303,14 @@ def produce_weights():
         for i in range(1,len(file_top)):
             dsid = dsid_list[i]
             ftop = h5py.File(file_top[i], 'r')
-            fat_jet_tree_top = np.hstack((fat_jet_tree_top,np.array(ftop["fat_jet"][:])))
-            subjet_1_top = np.hstack((subjet_1_top,np.array(ftop[subjet_collection+"_1"][:])))
-            subjet_2_top = np.hstack((subjet_2_top,np.array(ftop[subjet_collection+"_2"][:])))
+            fat_jet_tree_top = np.hstack((fat_jet_tree_top,np.array(ftop["fat_jet"]['eta','pt','mass','GhostHBosonsCount'])))
+            subjet_1_top = np.hstack((subjet_1_top,np.array(ftop[subjet_collection+"_1"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
+            subjet_2_top = np.hstack((subjet_2_top,np.array(ftop[subjet_collection+"_2"]['eta','pt','GhostBHadronsFinalCount','GhostCHadronsFinalCount'])))
             xsection = float(xsec_data[dsid]["crossSection"])*float(xsec_data[dsid]["filtereff"])
             weight_top = np.hstack((weight_top,np.array(ftop["fat_jet"]["mcEventWeight"][:])*xsection/ftop["metadata"]["nEventsProcessed"]))
             ftop.close()
-        
-        # ---     
+
+        # ---
         # --- CUTS
         if bool(args.masscut) == True:
             massCut = (fat_jet_tree_top['mass']>=75e3) & (fat_jet_tree_top['mass']<=145e3)
@@ -352,8 +352,8 @@ def produce_weights():
     # -------      eta, pt     --------- #
     for ivar in ['pt', 'eta']:
         dataset_sig.append( fat_jet_tree_sig[ivar] ) #1, #2
-        dataset_dijet.append( fat_jet_tree_dijet[ivar] ) 
-        if bool(args.tt) == True: dataset_top.append( fat_jet_tree_top[ivar] ) 
+        dataset_dijet.append( fat_jet_tree_dijet[ivar] )
+        if bool(args.tt) == True: dataset_top.append( fat_jet_tree_top[ivar] )
 
     #weight1=fat_jet_tree['mcEventWeight']*fat_jet_tree['Cross_Section']*fat_jet_tree['Filter_ef']/ fat_jet_tree['sumOfWeights']
     #weight_sig=fat_jet_tree_sig['mcEventWeight']/metadata_tree_sig['sumOfWeights']
@@ -405,12 +405,12 @@ def produce_weights():
 if __name__ == "__main__" :
 
     args = parse_args()
-    
+
     global name_tag
     name_tag = ""
 
     global input_dir, sigtxt, toptxt, dijettxt
-    input_dir = "/data/users/miochoa/doubleTagger/samples/august-datasets/"
+    input_dir = "/eos/user/e/evillhau/new_double_b_tagger_ines/double-tagger-fun/Preprocessing/"
     sigtxt = "signal.txt"
     dijettxt = "dijet.txt"
     toptxt = "top.txt"
