@@ -12,6 +12,7 @@ dependencies:
 - numpy=1.13
 - pip=9.0.1
 - python=2.7.14
+- pytables=3.4.2
 - scipy=1.1.0
 - tensorflow=1.4.1
 - theano=0.9.0
