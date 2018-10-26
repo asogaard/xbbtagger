@@ -178,7 +178,7 @@ def decorate (df, label, scale=1):
 
 @garbage_collect
 @logging
-def save (args, mini_data, mini_data_sj1, mini_data_sj2, suffix):
+def save (args, mini_data, mini_data_sj1, mini_data_sj2):
     """
 
     """
@@ -332,7 +332,7 @@ def save (args, mini_data, mini_data_sj1, mini_data_sj2, suffix):
         pass
 
     # Save pre-processed datasets to HDF5 file
-    outfile = '{}/output_Preprocessed{}_{}.h5'.format(args.output, args.nametag, suffix).replace('//', '/')
+    outfile = '{}/output_Preprocessed{}.h5'.format(args.output, args.nametag).replace('//', '/')
     print "Saving output to file\n  {}".format(outfile)
     with h5py.File(outfile, 'w') as h5f:
         h5f.create_dataset('arr_processed_bbjets', data=bbjets)
@@ -356,77 +356,6 @@ def main ():
     sigtxt    = "files/signal.txt"
     dijettxt  = "files/dijet.txt"
     toptxt    = "files/top.txt"
-
-    outfiles = list()
-    for f, cat in zip([sigtxt, dijettxt, toptxt], [Category.SIGNAL, Category.DIJET, Category.TTBAR]):
-
-        # Clean-up
-        gc.collect()
-
-        # Load data
-        fatjet, subjet1, subjet2 = read_files(args, f)
-
-        # Decorate
-        scale = 1
-        if cat == Category.SIGNAL:
-            label = map(lambda t: get_double_label(*t), zip(subjet1['GhostBHadronsFinalCount'],
-                                                            subjet1['GhostCHadronsFinalCount'],
-                                                            subjet2['GhostBHadronsFinalCount'],
-                                                            subjet2['GhostCHadronsFinalCount']))
-            scale = 1E+03
-        elif cat == Category.DIJET:
-            label = 'dijet'
-        else:
-            label = 'top'
-            pass
-        fatjet = decorate(fatjet, label, scale)
-
-        # Truth filtering
-        if cat == Category.DIJET:
-            msk = (fatjet['label'] == label_dict['H_bb']) & (fatjet["GhostHBosonsCount"] >= 1)
-            fatjet  = fatjet [msk]
-            subjet1 = subjet1[msk]
-            subjet2 = subjet2[msk]
-            print "Filtered number of signal events: %d"%len(fatjet)
-            pass
-
-        # Fill in NaN's
-        fatjet.fillna(-99)
-
-        # Save data to file
-        outfile = save(args, fatjet, subjet1, subjet2, cat)
-        outfiles.append(outfile)
-
-        # Clean-up
-        del fatjet, subjet1, subjet2
-        gc.collect()
-        pass
-
-    print outfiles
-
-    # Concatenate output files
-    bbjets, dijets, ttbar = list(), list(), list()
-    for f in outfiles:
-        with h5py.File(f, 'r') as h5f:
-            bbjets.append(h5f['arr_processed_bbjets'][:])
-            dijets.append(h5f['arr_processed_dijets'][:])
-            ttbar .append(h5f['arr_processed_ttbar'] [:])
-            pass
-        pass
-    bbjets = np.concatenate(bbjets, axis=0)
-    dijets = np.concatenate(dijets, axis=0)
-    ttbar  = np.concatenate(ttbar,  axis=0)
-
-    outfile = '{}/output_Preprocessed{}.h5'.format(args.output, args.nametag).replace('//', '/')
-    with h5py.File(outfile, 'w') as h5f:
-        h5f.create_dataset('arr_processed_bbjets', data=bbjets)
-        h5f.create_dataset('arr_processed_dijets', data=dijets)
-        if args.ttbar:
-            h5f.create_dataset('arr_processed_dijets', data=ttbar)
-            pass
-        pass
-
-    exit()
 
     # Load the input data files
     fatjet_data_sig,     subjet_1_sig,   subjet_2_sig   = read_files(args, sigtxt)
