@@ -53,10 +53,10 @@ def _run():
         else: model, subdir_name = get_seq_model(args.model, args.number_layers, nb_features, args.activation_function, args.l1, args.l2, args.activity_l1, args.activity_l2, args.init_distr, nb_classes, args.number_maxout, args.batch_normalization)
         subdir_name +="_"+args.optimizer+"_clipn"+str(int(args.clipnorm*100))+"_"+args.objective
 
-        part_from_inFile__reweighing_part = args.input_file.split(".h5")[0].split("__")[2]
-        part_from_inFile__pTmax_part = args.input_file.split(".h5")[0].split("__")[1].split("_")[3]
-        part_from_inFile__trainFrac_part = args.input_file.split(".h5")[0].split("__")[1].split("_")[2]
-        part_from_inFile = part_from_inFile__trainFrac_part+"_"+part_from_inFile__pTmax_part+"__"+part_from_inFile__reweighing_part
+        #part_from_inFile__reweighing_part = args.input_file.split(".h5")[0].split("__")[2]
+        #part_from_inFile__pTmax_part = args.input_file.split(".h5")[0].split("__")[1].split("_")[3]
+        #part_from_inFile__trainFrac_part = args.input_file.split(".h5")[0].split("__")[1].split("_")[2]
+        part_from_inFile = "mytest"  # part_from_inFile__trainFrac_part+"_"+part_from_inFile__pTmax_part+"__"+part_from_inFile__reweighing_part
 
         os.system("mkdir -p KerasFiles/%s/" % (subdir_name))
         os.system("mkdir -p KerasFiles/%s/Keras_output/" % (subdir_name))

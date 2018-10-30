@@ -13,7 +13,7 @@ import h5py
 def transform_for_Keras(nb_classes):
   from keras.utils import np_utils
 
-  FILE_PATH = '/eos/user/e/evillhau/new_double_b_tagger_ines/double-tagger-fun/Preprocessing/output_folder/'
+  FILE_PATH = 'output/'  # '/eos/user/e/evillhau/new_double_b_tagger_ines/double-tagger-fun/Preprocessing/output_folder/'
   f=h5py.File(FILE_PATH + 'prepared_sample_v2.h5', 'r')
   wf=h5py.File(FILE_PATH + 'Weight_0.h5','r')
 
