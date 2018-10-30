@@ -24,9 +24,8 @@ Copy over the data
 $ mkdir -p /exports/eddie/scratch/<UUN>/xbbtagger/{input,output}
 $ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/input input
 $ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/output output
-$
-<USERNAME>@lxplus.cern.ch:/afs/cern.ch/work/a/asogaard/public/xbbtagger/input/*
-/exports/eddie/scratch/<UUN>/xbbtagger/input/
+$ scp -r
+<USERNAME>@lxplus.cern.ch:/afs/cern.ch/work/a/asogaard/public/xbbtagger/input/* /exports/eddie/scratch/<UUN>/xbbtagger/input/
 ```
 
 Setup the environment
