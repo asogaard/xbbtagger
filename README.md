@@ -19,15 +19,6 @@ $ git clone git@github.com:asogaard/xbbtagger.git
 $ cd xbbtagger
 ```
 
-Copy over the data
-```bash
-$ mkdir -p /exports/eddie/scratch/<UUN>/xbbtagger/{input,output}
-$ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/input input
-$ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/output output
-$ scp -r
-<USERNAME>@lxplus.cern.ch:/afs/cern.ch/work/a/asogaard/public/xbbtagger/input/* /exports/eddie/scratch/<UUN>/xbbtagger/input/
-```
-
 Setup the environment
 ```bash
 $ # Install conda...
@@ -35,10 +26,34 @@ $ conda env create -f Environments/xbbtagger.yml
 $ source activate xbbtagger
 ```
 
-Run the code
+Go into the Preprocessing folder
 ```bash
-$ python Preprocessing/preprocessing.py -m 1 | tee log_preprocessing.out
-$ python Preprocessing/reweighting.py   -m 1 | tee log_reweighting.out
-$ python Preprocessing/preparing.py     -m 1 | tee log_preparing.out
+$ cd Preprocessing
+```
+
+Copy over the data
+```bash
+$ mkdir -p /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/{input,output}
+$ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/ input
+$ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/ output
+$ scp -r
+<USERNAME>@lxplus.cern.ch:/afs/cern.ch/work/a/asogaard/public/xbbtagger/input/* /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/input/
+```
+
+Run the preprocessing code
+```bash
+$ python preprocessing.py -m 1 | tee log_preprocessing.out
+$ python reweighting.py   -m 1 | tee log_reweighting.out
+$ python preparing.py     -m 1 | tee log_preparing.out
 $ ls -lrt output/
+```
+
+Go into the Training folder
+```bash
+$ cd ../Training
+```
+
+Run the training code
+```bash
+$ python btagging_nn.py --input_file ../Preprocessing/output/prepared_sample_v2.h5
 ```
