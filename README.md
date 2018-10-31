@@ -31,14 +31,14 @@ $ scp -r
 Setup the environment
 ```bash
 $ # Install conda...
-$ conda env create -f envs/xbbtagger.yml
+$ conda env create -f Environments/xbbtagger.yml
 $ source activate xbbtagger
 ```
 
 Run the code
 ```bash
-$ python preprocessing.py -m 1 | tee log_preprocessing.out
-$ python reweighting.py   -m 1 | tee log_reweighting.out
-$ python preparing.py     -m 1 | tee log_preparing.out
+$ python Preprocessing/preprocessing.py -m 1 | tee log_preprocessing.out
+$ python Preprocessing/reweighting.py   -m 1 | tee log_reweighting.out
+$ python Preprocessing/preparing.py     -m 1 | tee log_preparing.out
 $ ls -lrt output/
 ```
