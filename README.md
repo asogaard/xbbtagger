@@ -72,9 +72,8 @@ Run the training code using TensorFlow (GPU?)
 ```bash
 $ KERAS_BACKEND=tensorflow python btagging_nn.py --input_file ../Preprocessing/output/prepared_sample_v2.h5 --batch_size=8192
 ```
-or using Theano no GPU
+or using Theano on GPU
 ```bash
 MKL_THREADING_LAYER=GNU THEANO_FLAGS=device=cuda,floatX=float32 python
-btagging_nn.py --input ../Preprocessing/output/prepared_sample_v2.h5
---batch_size=8192
+btagging_nn.py --input ../Preprocessing/output/prepared_sample_v2.h5 --batch_size=8192
 ```
