@@ -104,9 +104,9 @@ def _run():
 
             training_time = time.time()
             callbacks = [model_check_point]
-            callbacks.append(learning_rate_reduction)
-            #if args.patience>=0:
-            #    callbacks.append(early_stopping)
+            #callbacks.append(learning_rate_reduction)
+            if args.patience>=0:
+                callbacks.append(early_stopping)
                
             if backend._BACKEND=="tensorflow":
                 os.system("mkdir -p ./KerasFiles/TensorFlow_logs/")
