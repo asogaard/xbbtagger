@@ -17,6 +17,7 @@ def save_to_hdf5 (filename, datasets):
   """
   ...
   """
+  print "[save_to_hdf5] file: {}".format(filename)
   with h5py.File(filename, 'w') as h5f:
     for name, data in datasets.iteritems():
       h5f.create_dataset(name, data=data)
@@ -25,6 +26,7 @@ def save_to_hdf5 (filename, datasets):
   return
 
 def load_reweighting (filename, args):
+  print "[load_reweighting] file: {}".format(filename)
   with h5py.File(filename, 'r') as h5f:
     bb_weights = h5f['bb_vs_bb_weights']   [:]
     di_weights = h5f['dijet_vs_bb_weights'][:]
@@ -72,6 +74,40 @@ def main ():
     #print W[:]
     pass
 
+  # Read variable list from file
+  with open(args.output+'/variables.txt','r') as varfile:
+    var_list = varfile.read().splitlines()
+    pass
+
+  # Multiply re-weighing weights with MC weights
+  #W_train *= X[:,var_list.index('weight')]
+  #W_test  *= X[:,var_list.index('weight')]
+
+  # Normalise weights to unit mean within each class
+  groups = [
+    np.arange(len(bbjets)),    
+    np.arange(len(dijets)) + len(bbjets),
+    ]
+  if args.ttbar:
+    groups.append(np.arange(len(ttbar)) + len(dijets) + len(bbjets))
+    pass
+
+  # -- Normalise all groups to have sum 1
+  for group in groups:
+    W_train[group] /= W_train[group].sum()
+    W_test [group] /= W_test [group].sum()
+    pass
+
+  # -- Normalise signal to have mean 1
+  W_train[groups[0]] /= W_train[groups[0]].mean()
+  W_test [groups[0]] /= W_test [groups[0]].mean()
+
+  # -- Normalise all background groups to have same sum as signal
+  for group in groups[1:]:
+    W_train[group] *= W_train[groups[0]].sum() / float(len(groups) - 1)
+    W_test [group] *= W_test [groups[0]].sum() / float(len(groups) - 1)
+    pass
+
   # Shuffle arrays
   indices = np.arange(X.shape[0], dtype=int)
   np.random.shuffle(indices)
@@ -81,19 +117,10 @@ def main ():
   W_train = W_train[indices]
   W_test  = W_test [indices]
 
-  # Read variable list from file
-  with open(args.output+'/variables.txt','r') as varfile:
-    var_list = varfile.read().splitlines()
-    pass
-
-  # Multiply re-weighing weights with MC weights
-  W_train *= X[:,var_list.index('weight')]
-  W_test  *= X[:,var_list.index('weight')]
-
   # ...
-  n_mv2c = len(variable_info.default_vars)*2 #FIXME: missing _trk_? -> FIXME: make it depend on number of subjets
+  n_mv2c   = len(variable_info.default_vars)*2 #FIXME: missing _trk_? -> FIXME: make it depend on number of subjets
   n_fatjet = len(variable_info.fat_jet_vars)
-  n_label = 2  # label, DSID
+  n_label  = 2  # label, weight
 
   ini_feature = n_mv2c + n_fatjet + n_label
 
@@ -108,6 +135,7 @@ def main ():
   # fat-jet info + baseline tagger
   arr_jet_pt = X[:,var_list.index("fat_jet_pt")]
   arr_jet_m = X[:,var_list.index("fat_jet_mass")]
+  arr_jet_eta = X[:,var_list.index("fat_jet_eta")]
   tmp = var_list.index(args.subjet+"_1_"+"MV2c10_discriminant")
   arr_baseline_tagger = X[:,tmp:tmp+n_mv2c] #don't hard code this!
   # features
@@ -158,7 +186,8 @@ def main ():
     # Reference features
     'arr_baseline_tagger': arr_baseline_tagger,
     'arr_jet_pt': arr_jet_pt,
-    'arr_jet_m':  arr_jet_m,
+    'arr_jet_mass':  arr_jet_m,
+    'arr_jet_eta':  arr_jet_eta,
     'arr_label':  arr_label,
     }
   if args.ttbar:
@@ -173,7 +202,7 @@ def main ():
   # Do rescaling of `X`
   for i in range(n_feature-1):
     if (std[i]!=0 and bool(args.scaling)):
-      X[:,i]=(X[:,i]-mean[i])/std[i]
+      X[:,i] = (X[:,i] - mean[i]) / std[i]
       pass
     pass
 
