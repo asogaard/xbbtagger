@@ -2,15 +2,14 @@
 
 To use the necessary python packages on lxplus, _use conda!_
 
-### Quick start
+
+## Preprocessing
 
 Log onto a suitable Eddie node
 ```bash
 $ ssh -Y <UUN>@eddie3.ecdf.ed.ac.uk
 $ qlogin -pe sharedmem 4 -l h_vmem=10G
 ```
-Actually, 20 GB (e.g. 2 x 10 GB) in total should be sufficient, cf. the
-print-outs in the running code below. We're requesting 40 GB just to be safe.
 
 Clone the xbbtagger code
 ```bash
@@ -48,12 +47,34 @@ $ python preparing.py     -m 1 | tee log_preparing.out
 $ ls -lrt output/
 ```
 
+
+## Training
+
+Log onto a suitable Eddie node
+```bash
+$ ssh -Y <UUN>@eddie3.ecdf.ed.ac.uk
+$ qlogin -pe gpu 2 -l h_vmem=10G
+```
+
+Setup the environment
+```bash
+$ conda env create -f Environments/xbbtagger-gpu.yml
+$ module load cuda
+$ source activate xbbtagger-gpu
+```
+
 Go into the Training folder
 ```bash
 $ cd ../Training
 ```
 
-Run the training code
+Run the training code using TensorFlow (GPU?)
 ```bash
-$ python btagging_nn.py --input_file ../Preprocessing/output/prepared_sample_v2.h5
+$ KERAS_BACKEND=tensorflow python btagging_nn.py --input_file ../Preprocessing/output/prepared_sample_v2.h5 --batch_size=8192
+```
+or using Theano no GPU
+```bash
+MKL_THREADING_LAYER=GNU THEANO_FLAGS=device=cuda,floatX=float32 python
+btagging_nn.py --input ../Preprocessing/output/prepared_sample_v2.h5
+--batch_size=8192
 ```
