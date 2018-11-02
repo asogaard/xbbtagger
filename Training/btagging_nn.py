@@ -31,18 +31,22 @@ def _run():
     args = _get_args()
     np.random.seed(args.seed_nr)  # for reproducibility
 
+    # Create directories
     os.system("mkdir -p KerasFiles/")
     os.system("mkdir -p KerasFiles/input/")
     os.system("mkdir -p KerasFiles/LogFiles/")
     protocol_dict = {}
 
-    loading_time = time.time()
-    loading_time = time.time() - loading_time
-    nb_classes=2
-    nb_features=100
-    X_train, Y_train,  X_test, Y_test, X_val, Y_val, sample_weights_training,sample_weights_testing, sample_weights_validation,arr_baseline_tagger_train, arr_jet_pt_train, arr_baseline_tagger_test, arr_jet_pt_test , arr_baseline_tagger_val, arr_jet_pt_val = transform_for_Keras(nb_classes)
+    # Load data
+    nb_classes = 2
+    begin = time.time()
+    X, Y, W_train, W_test, train, test, val, arr_baseline_tagger, arr_jet_pt, arr_jet_mass, arr_jet_eta = transform_for_Keras(nb_classes)
+    end = time.time()
+    loading_time = end - begin  # in seconds
+    nb_features = X.shape[1]  # 100
 
-    print(X_train.shape, sample_weights_training.shape, Y_train.shape)
+
+    print (X.shape, W_train.shape, Y.shape)
   
     for arg in vars(args):
         protocol_dict.update({arg: getattr(args, arg)})
@@ -53,10 +57,7 @@ def _run():
         else: model, subdir_name = get_seq_model(args.model, args.number_layers, nb_features, args.activation_function, args.l1, args.l2, args.activity_l1, args.activity_l2, args.init_distr, nb_classes, args.number_maxout, args.batch_normalization)
         subdir_name +="_"+args.optimizer+"_clipn"+str(int(args.clipnorm*100))+"_"+args.objective
 
-        #part_from_inFile__reweighing_part = args.input_file.split(".h5")[0].split("__")[2]
-        #part_from_inFile__pTmax_part = args.input_file.split(".h5")[0].split("__")[1].split("_")[3]
-        #part_from_inFile__trainFrac_part = args.input_file.split(".h5")[0].split("__")[1].split("_")[2]
-        part_from_inFile = "mytest"  # part_from_inFile__trainFrac_part+"_"+part_from_inFile__pTmax_part+"__"+part_from_inFile__reweighing_part
+        part_from_inFile = "mytest"
 
         os.system("mkdir -p KerasFiles/%s/" % (subdir_name))
         os.system("mkdir -p KerasFiles/%s/Keras_output/" % (subdir_name))
@@ -92,7 +93,7 @@ def _run():
                 model.compile(loss=args.objective, optimizer=args.optimizer, metrics=["accuracy"])
 
             # Callback: early stopping if loss does not decrease anymore after a certain number of epochs
-            early_stopping = EarlyStopping(monitor="val_acc", patience=args.patience, mode='auto')
+            early_stopping = EarlyStopping(monitor="val_loss", patience=args.patience, mode='auto')
 
 
             # Callback: will save weights (= model checkpoint) if the validation loss reaches a new minium at the latest epoch
@@ -116,24 +117,24 @@ def _run():
 
 
             if args.validation_split==0.:
-                history = model.fit(X_train, Y_train,
+                history = model.fit(X[train], Y[train],
                                     batch_size=args.batch_size, nb_epoch=args.nb_epoch,
                                     callbacks=callbacks,
                                     #show_accuracy=True,#inesochoa
                                     verbose=1,
-                                    validation_data=(X_val, Y_val, sample_weights_validation),
-                                    sample_weight=sample_weights_training
+                                    validation_data=(X[val], Y[val], W_train[val]),
+                                    sample_weight=W_train[train]
                                    ) # shuffle=True (default)
 
             else:
                 print( "test")
-                history = model.fit(X_train, Y_train,
+                history = model.fit(X[train], Y[train],
                                     batch_size=args.batch_size, nb_epoch=args.nb_epoch,
                                     callbacks=callbacks,
                                     #show_accuracy=True,#inesochoa
                                     verbose=1,
                                     validation_split=args.validation_split,
-                                    sample_weight=sample_weights_training,
+                                    sample_weight=W_train[train],
                                     shuffle=True# (default) 
                                    ) # shuffle=True (default)
             # store history:
@@ -142,13 +143,13 @@ def _run():
             training_time=time.time()-training_time
 
             evaluation_time = time.time()
-            score = model.evaluate(X_test, Y_test, sample_weight=sample_weights_testing, verbose=1)
+            score = model.evaluate(X[test], Y[test], sample_weight=W_train[test], verbose=1)
                                    #show_accuracy=True,  sample_weight=sample_weights_testing, verbose=1)#inesochoa
             evaluation_time=time.time()-evaluation_time
             protocol_dict.update({"Classification score": score[0],"Classification accuracy": score[1]})
 
             prediction_time = time.time()
-            predictions = model.predict(X_test, batch_size=args.batch_size, verbose=1) # returns predictions as numpy array
+            predictions = model.predict(X[test], batch_size=args.batch_size, verbose=1) # returns predictions as numpy array
             prediction_time=time.time()-prediction_time
 
             timing_dict = {
@@ -163,7 +164,7 @@ def _run():
             open("KerasFiles/"+subdir_name+"/Keras_output/flavtag_model_architecture__"+out_str+".json", "w").write(json_string)
             # save NN configuration weights:
             model.save_weights("KerasFiles/"+subdir_name+"/Keras_output/flavtag_model_weights__"+out_str+".h5", overwrite=True)
-            if not bool(args.func): classes = model.predict_classes(X_test, batch_size=args.batch_size)#, sample_weight=sample_weights_testing)
+            if not bool(args.func): classes = model.predict_classes(X[test], batch_size=args.batch_size)#, sample_weight=sample_weights[test]ing)
             plot(model, to_file="KerasFiles/"+subdir_name+"/Keras_output/plot__"+out_str+"model.eps")
             loss_list = history.history['loss']                                                                                                                                                                        
 
@@ -174,16 +175,22 @@ def _run():
 
             h5f = h5py.File(store_str, 'w')
             h5f.create_dataset('Y_pred', data=predictions)
-            h5f.create_dataset('Y_test', data=Y_test)
-            if not bool(args.func): h5f.create_dataset('class', data=classes)
-            h5f.create_dataset('X_test', data=X_test)
-            h5f.create_dataset('weight',data=sample_weights_testing)
-            h5f.create_dataset('jet_pt',data=arr_jet_pt_test)
-            h5f.create_dataset('baseline_tagger',data=arr_baseline_tagger_test)
+            h5f.create_dataset('Y', data=Y[test])
+            if not bool(args.func):
+                h5f.create_dataset('class', data=classes)
+                pass
+            h5f.create_dataset('X', data=X[test])
+            h5f.create_dataset('W_train', data=W_train[test])
+            h5f.create_dataset('W_test',  data=W_test [test])
+            h5f.create_dataset('jet_pt',   data=arr_jet_pt[test])
+            h5f.create_dataset('jet_mass', data=arr_jet_mass[test])
+            h5f.create_dataset('jet_eta',  data=arr_jet_eta[test])
+            h5f.create_dataset('baseline_tagger',data=arr_baseline_tagger[test])
             h5f.close()
             json_string = model.to_json()
             with open("KerasFiles/LogFiles/"+out_str+"model.json", "w") as json_file:
-	           json_file.write(json_string)
+                json_file.write(json_string)
+                pass
 
             print("Outputs:\n  --> saved history as:", history_filename, "\n  --> saved architecture as: KerasFiles/"+subdir_name+"/Keras_output/flavtag_model_architecture__"+out_str+".json\n  --> saved NN weights as: KerasFiles/"+subdir_name+"/Keras_output/flavtag_model_weights__"+out_str+".h5\n  --> saved predictions as ", store_str)
 
