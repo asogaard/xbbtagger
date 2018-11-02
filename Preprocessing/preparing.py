@@ -24,6 +24,14 @@ def save_to_hdf5 (filename, datasets):
     pass
   return
 
+def load_reweighting (filename, args):
+  with h5py.File(filename, 'r') as h5f:
+    bb_weights = h5f['bb_vs_bb_weights']   [:]
+    di_weights = h5f['dijet_vs_bb_weights'][:]
+    tt_weights = h5f['ttbar_vs_bb_weights'][:] if args.ttbar else None
+    pass
+  return bb_weights, di_weights, tt_weights
+
 
 # Main function definition
 def main ():
@@ -40,33 +48,10 @@ def main ():
           pass
       pass
 
-  # Read training weights from HDF5 file
-  with h5py.File('{}/Weight_0{}.h5'.format(args.output, args.nametag), 'r') as wf:
-      bb_weight_train = wf['bb_vs_bb_weights'][:]
-      print("this is the shape of bb_weight_train", bb_weight_train.shape)
-      di_weight_train = wf['dijet_vs_bb_weights'][:]
-      #print(di_weight_train)
-      print("this is the shape of di_weight_train", di_weight_train.shape)
-      if args.ttbar:
-          tt_weight_train = wf['ttbar_vs_bb_weights'][:]
-          pass
-      print("this is the shape of tt_weight_train", tt_weight_train.shape)
-      print "inesochoa 0: this should be a weight_train = ",di_weight_train[:]
-      pass
-
-  # Read testing weights from HDF5 file
-  with h5py.File('{}/Weight_1{}.h5'.format(args.output, args.nametag), 'r') as wf:
-      bb_weight_test = wf['bb_vs_bb_weights'][:]
-      print("this is the shape of bb_weight_test", bb_weight_test.shape)
-      di_weight_test = wf['dijet_vs_bb_weights'][:]
-      #print(di_weight_test)
-      print("this is the shape of di_weight_test", di_weight_test.shape)
-      if args.ttbar:
-          tt_weight_test = wf['ttbar_vs_bb_weights'][:]
-          pass
-      print("this is the shape of tt_weight_test", tt_weight_test.shape)
-      print "inesochoa 0: this should be a weight_test = ",di_weight_test[:]
-      pass
+  # Read training and test weights from HDF5 file
+  pattern = '{}/Weight_{{ptflat:d}}{}.h5'.format(args.output, args.nametag)
+  bb_weight_train, di_weight_train, tt_weight_train = load_reweighting(pattern.format(ptflat=1), args)
+  bb_weight_test,  di_weight_test,  tt_weight_test  = load_reweighting(pattern.format(ptflat=0), args)
 
   if args.ttbar:
     # features
@@ -161,8 +146,10 @@ def main ():
     # Per-clas data
     'dijet': dijets,
     'bbjet': bbjets,
-    'dijet_weight': di_weight,
-    'bbjet_weight': bb_weight,
+    'dijet_weight_train': di_weight_train,
+    'bbjet_weight_train': bb_weight_train,
+    'dijet_weight_test':  di_weight_test,
+    'bbjet_weight_test':  bb_weight_test,
 
     # Feature scaling
     'mean': mean,
@@ -175,8 +162,9 @@ def main ():
     'arr_label':  arr_label,
     }
   if args.ttbar:
-    datasets['ttbar']        = ttbar
-    datasets['ttjet_weight'] = tt_weight
+    datasets['ttbar']              = ttbar
+    datasets['ttjet_weight_train'] = tt_weight_train
+    datasets['ttjet_weight_test']  = tt_weight_test
     pass
   
   # Actually save stuff
