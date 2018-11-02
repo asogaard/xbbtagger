@@ -35,8 +35,7 @@ Copy over the data
 $ mkdir -p /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/{input,output}
 $ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/ input
 $ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/ output
-$ scp -r
-<USERNAME>@lxplus.cern.ch:/afs/cern.ch/work/a/asogaard/public/xbbtagger/input/* /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/input/
+$ scp -r <USERNAME>@lxplus.cern.ch:/afs/cern.ch/work/a/asogaard/public/xbbtagger/input/* /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/input/
 ```
 
 Run the preprocessing code
@@ -74,6 +73,5 @@ $ KERAS_BACKEND=tensorflow python btagging_nn.py --input_file ../Preprocessing/o
 ```
 or using Theano on GPU
 ```bash
-MKL_THREADING_LAYER=GNU THEANO_FLAGS=device=cuda,floatX=float32 python
-btagging_nn.py --input ../Preprocessing/output/prepared_sample_v2.h5 --batch_size=8192
+MKL_THREADING_LAYER=GNU THEANO_FLAGS=device=cuda,floatX=float32 python btagging_nn.py --input ../Preprocessing/output/prepared_sample_v2.h5 --batch_size=8192
 ```
