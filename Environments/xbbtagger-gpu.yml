@@ -1,4 +1,4 @@
-name: xbbtagger
+name: xbbtagger-gpu
 channels:
 - defaults
 - anaconda
@@ -14,7 +14,7 @@ dependencies:
 - python=2.7.14
 - pytables=3.4.2
 - scipy=1.1.0
-- tensorflow=1.4.1
+- tensorflow-gpu=1.4.1
 - theano=1.0.1
 - pip:
   - graphviz==0.8.1
