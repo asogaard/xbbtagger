@@ -58,46 +58,28 @@ memory_per_node=10
 nodes=$(( ($memory + $memory_per_node - 1) / $memory_per_node ))
 # ^ Round up, such that we have at least `memory` available
 
-function spinner {
-    i=1
-    sp="/-\|"
-    echo -n ' '
-    while true; do
-	printf "\b\b\b[${sp:i++%${#sp}:1}]"
-	sleep 0.1
-    done
-}
-
 # Start login loop
 counter=1
 response="1"
 logfile=".qlogin_output"
-cmd="qlogin -pe ${pe} ${nodes} -l h_vmem=${memory_per_node}G" 
 echo "Logging onto ${nodes} '${pe}' Eddie node(s) with ${memory_per_node} GB memory each."
-echo "> ${cmd}"
+echo "> qlogin -pe ${pe} ${nodes} -l h_vmem=${memory_per_node}G" 
 while (( "$response" == 1 )); do
-    # Logginng
-    echo -n "[${counter}] Requesting login.   "
+
+    # Logging
+    echo "[${counter}] Requesting login."
     start=`date +%s`
-    # Start spinner
-    spinner &
-    pid_spinner=$!
 
     # Request login
-    eval "${cmd} > $logfile 2>&1"
+    qlogin -pe ${pe} ${nodes} -l h_vmem=${memory_per_node}G  2> $logfile
     response=$?
-    
-    # Silently kill spinner
-    echo ""
-    kill $pid_spinner
-    wait $pid_spinner 2>/dev/null
 
     # Check response
     end=`date +%s`
-    if (( "$(grep "Request for interactive job has been canceled." .qlogin_output | wc -l)" > 0 )); then
+    if (( "$(grep "Request for interactive job has been canceled." $logfile | wc -l)" > 0 )); then
 	echo "[ctrl+c] Exiting gracefully."
 	response=4
-    else
+    elif (( "$response" == 1 )); then
 	echo "[${counter}] ... Attempt unsuccessful ($((end - start)) secs)."
 	counter=$(($counter + 1))
     fi
