@@ -1,6 +1,13 @@
 #!/bin/bash
 # Login to an Eddie3 compute node
 
+# Check platform
+if [[ -z $(uname --all | grep ecdf.ed.ac.uk) ]]; then
+    echo "[ERROR] The script only works on Eddie3."
+    return 1
+fi
+
+# Helper methods
 function print_help () {
 	echo "Bash script to automate login to Eddie3 compute nodes."
 	echo ""
@@ -34,6 +41,7 @@ for arg in "${arguments[@]}"; do
         memory="$(sed 's/\([0-9]*\).*/\1/g' <<< $arg)"
     else
         echo "[ERROR] Argument '$arg' was not understood."
+	echo "Try 'source login.sh --help' for more information."
 	return 1
     fi
 done
