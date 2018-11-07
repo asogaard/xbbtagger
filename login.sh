@@ -15,11 +15,11 @@ function print_help () {
 	echo "  Parallel environment: ['sharedmem', 'gpu']."
 	echo "      - Default: 'sharedmem'"
 	echo "  Memory: Integer followed by g, gb, G, or GB, for instance '20GB'."
-	echo "      - Default '10GB'"
+	echo "      - Default '40GB'"
 	echo ""
 	echo "Example commands:"
 	echo "  source login.sh"
-	echo "  source login.sh sharedmem 10g"
+	echo "  source login.sh sharedmem 40g"
 	echo "  source login.sh gpu 20GB"
 }
 
@@ -28,7 +28,7 @@ arguments=("$@")
 set -- # Unsetting positional arguments, to avoid error from "source deactivate"
 
 pe="sharedmem"
-memory="10"
+memory="40"
 for arg in "${arguments[@]}"; do
     if   [[ "$arg" =~ .*elp$|.*-h.*$ ]]; then
 	print_help
