@@ -23,14 +23,14 @@ def parse_args():
     Common command-line argument parser.
     '''
     parser = argparse.ArgumentParser()
-    parser.add_argument('-sj', '--subjet',  default="subjet_ExKt2", help="Subjet collection.")
-    parser.add_argument(       '--scaling', default=True,      type=bool, help="Perform scaling.")
-    parser.add_argument('-i',  '--input',   default='input/',  type=str, help="Input folder from where to read original HDF5 files.")
-    parser.add_argument('-o',  '--output',  default='output/', type=str, help="Output folder where to store preprocessed HDF5 and reweighting files.")
-    parser.add_argument('-m',  '--masscut', default=False,     type=bool, help="Apply Higgs mass cut.")
-    parser.add_argument('-pt', '--ptcut',   default=True,      type=bool, help="Apply maximum pT cut on fat-jet.")
-    parser.add_argument(       '--pt-flat', default=0,         type=bool, help="Flatten pt distributions.")
-    parser.add_argument('-tt', '--ttbar',   default=1,         type=int, help="Include ttbar background.")
+    parser.add_argument('-sj', '--subjet',   default="subjet_ExKt2", help="Subjet collection.")
+    parser.add_argument(       '--no-scaling',                  action='store_false', help="Perform scaling.")
+    parser.add_argument('-i',  '--input',    default='input/',  type=str, help="Input folder from where to read original HDF5 files.")
+    parser.add_argument('-o',  '--output',   default='output/', type=str, help="Output folder where to store preprocessed HDF5 and reweighting files.")
+    parser.add_argument('-m',  '--masscut',                     action='store_true', help="Apply Higgs mass cut.")
+    parser.add_argument(       '--no-ptcut', dest='ptcut',      action='store_false', help="Apply maximum pT cut on fat-jet.")
+    parser.add_argument(       '--pt-flat',                     action='store_true', help="Flatten pt distributions.")
+    parser.add_argument('-tt', '--ttbar',                       action='store_true', help="Include ttbar background.")
     parser.add_argument(       '--nametag', default='',        type=str, help="Custom name-tag.")
     return parser.parse_args()
 
