@@ -8,11 +8,13 @@
     Switch backend using: KERAS_BACKEND=tensorflow ./btagging_nn.py
 
 '''
+# Import(s)
 from __future__ import print_function
 import numpy as np
 import pandas as pd
 import os, time, json, argparse
 from datetime import date
+
 from keras import backend
 from keras.models import Sequential
 from keras.models import Model
@@ -26,6 +28,7 @@ from btag_nn import save_history, transform_for_Keras
 import h5py
 from btagging_nn_models import get_seq_model
 from btagging_nn_models import get_func_model
+
 
 def _run():
     args = _get_args()
@@ -46,8 +49,6 @@ def _run():
     nb_features = X.shape[1]  # 100
 
 
-    print (X.shape, W_train.shape, Y.shape)
-  
     for arg in vars(args):
         protocol_dict.update({arg: getattr(args, arg)})
 
