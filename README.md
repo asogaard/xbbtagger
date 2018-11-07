@@ -40,9 +40,10 @@ $ scp -r <USERNAME>@lxplus.cern.ch:/afs/cern.ch/work/a/asogaard/public/xbbtagger
 
 Run the preprocessing code
 ```bash
-$ python preprocessing.py -m 1 | tee log_preprocessing.out
-$ python reweighting.py   -m 1 | tee log_reweighting.out
-$ python preparing.py     -m 1 | tee log_preparing.out
+$ python preprocessing.py --masscut --ttbar | tee log_preprocessing.out
+$ python reweighting.py             --ttbar | tee log_reweighting_0.out
+$ python reweighting.py   --pt-flat --ttbar | tee log_reweighting_1.out
+$ python preparing.py               --ttbar | tee log_preparing.out
 $ ls -lrt output/
 ```
 
@@ -52,7 +53,7 @@ $ ls -lrt output/
 Log onto a suitable Eddie node
 ```bash
 $ ssh -Y <UUN>@eddie3.ecdf.ed.ac.uk
-$ qlogin -pe gpu 2 -l h_vmem=10G
+$ qlogin -pe gpu 2 -l h_vmem=40G
 ```
 
 Setup the environment
