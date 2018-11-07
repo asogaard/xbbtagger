@@ -193,7 +193,7 @@ def main ():
 
   # Do rescaling of `X`
   for i in range(n_feature - 1):
-    if std[i] != 0 and (not args.no_scaling):
+    if std[i] != 0 and args.scaling:
       X[:,i] = (X[:,i] - mean[i]) / std[i]
       pass
     pass

@@ -24,7 +24,7 @@ def parse_args():
     '''
     parser = argparse.ArgumentParser()
     parser.add_argument('-sj', '--subjet',   default="subjet_ExKt2", help="Subjet collection.")
-    parser.add_argument(       '--no-scaling',                  action='store_false', help="Perform scaling.")
+    parser.add_argument(       '--no-scaling', dest='scaling',  action='store_false', help="Perform scaling.")
     parser.add_argument('-i',  '--input',    default='input/',  type=str, help="Input folder from where to read original HDF5 files.")
     parser.add_argument('-o',  '--output',   default='output/', type=str, help="Output folder where to store preprocessed HDF5 and reweighting files.")
     parser.add_argument('-m',  '--masscut',                     action='store_true', help="Apply Higgs mass cut.")
