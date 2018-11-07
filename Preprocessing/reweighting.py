@@ -58,7 +58,7 @@ def makeBinValueDict(array,x_edges,y_edges):
      return binvaldict
 
 #------------------------------------------------------------
-def ptflat_reweight(num_array, denom_array, bins_pt=50, bins_eta=10):
+def ptflat_reweight(num_array, denom_array, bins_pt=50, bins_eta=20):
     #the inputs should be 2 columns, of the two variables used for reweighting
 
     # Separate arrays for numerator
@@ -84,12 +84,11 @@ def ptflat_reweight(num_array, denom_array, bins_pt=50, bins_eta=10):
 
     # Fill 2D histograms for numerator and denominator
     # @NOTE: Use weights? Not done in original script
-    h_denom, xedges, yedges = np.histogram2d(denom_pt, denom_eta, bins=(bins_pt, bins_eta))#, weights=denom_weight)
-    h_num,   _,      _      = np.histogram2d(num_pt,   num_eta,   bins=(bins_pt, bins_eta))#, weights=num_weight)
+    h_denom, xedges, yedges = np.histogram2d(denom_pt, denom_eta, bins=(bins_pt, bins_eta), weights=denom_weight)
+    h_num,   _,      _      = np.histogram2d(num_pt,   num_eta,   bins=(bins_pt, bins_eta), weights=num_weight)
 
     a = h_num
     b = h_denom
-    #print(np.shape(a))
 
     mean = np.divide(np.sum(h_num, axis=0), np.count_nonzero(h_denom, axis=0))
 
@@ -113,7 +112,7 @@ def ptflat_reweight(num_array, denom_array, bins_pt=50, bins_eta=10):
     return weightarray
 
 #------------------------------------------------------------
-def ptEta_reweight(num_array, denom_array, bins_pt=50, bins_eta=10):
+def ptEta_reweight(num_array, denom_array, bins_pt=50, bins_eta=20):
     #the inputs should be 2 columns, of the two variables used for reweighting
 
     # Separate arrays for numerator
@@ -139,33 +138,19 @@ def ptEta_reweight(num_array, denom_array, bins_pt=50, bins_eta=10):
 
     # Fill 2D histograms for numerator and denominator
     # @NOTE: Use weights? Not done in original script
-    h_denom, xedges, yedges = np.histogram2d(denom_pt, denom_eta, bins=(bins_pt, bins_eta))#, weights=denom_weight)
-    h_num,   _,      _      = np.histogram2d(num_pt,   num_eta,   bins=(bins_pt, bins_eta))#, weights=num_weight)
+    h_denom, xedges, yedges = np.histogram2d(denom_pt, denom_eta, bins=(bins_pt, bins_eta), weights=denom_weight)
+    h_num,   _,      _      = np.histogram2d(num_pt,   num_eta,   bins=(bins_pt, bins_eta), weights=num_weight)
 
     # Remove zeros in denominator @NOTE: Necessary/proper?
     #h_denom = np.clip(h_denom, 1E-05, None)  # @NOTE: (..., 1, ...)?
 
     # Take ratio
     weightHist = np.divide(h_num, h_denom)
-
+    
     # Compute per-jet weights
     ixs = np.clip(np.digitize(denom_pt,  xedges) - 1, 0, len(xedges) - 2)
     iys = np.clip(np.digitize(denom_eta, yedges) - 1, 0, len(yedges) - 2)
     reweights = weightHist[ixs, iys]
-
-    '''
-    reweights = []
-    for pt, eta, _ in denom_array:
-        ix = np.clip(np.digitize(pt,  xedges) - 1, 0, len(xedges) - 2)
-        iy = np.clip(np.digitize(eta, yedges) - 1, 0, len(yedges) - 2)
-
-        reweights.append(weightHist[ix, iy])
-        pass
-        '''
-
-    h_test, _, _ = np.histogram2d(denom_pt, denom_eta, bins=(bins_pt, bins_eta), weights=reweights)
-    print "-->", (h_denom - h_num).mean(), (h_denom - h_num).std()
-    print "==>", (h_test - h_num).mean(), (h_test - h_num).std()
 
     return reweights
 
@@ -175,14 +160,16 @@ def main ():
 
     # Parse command-line arguments
     args = parse_args()
-
+    print "Command-line arguments:"
+    print args
+    
     # Load list of variable names from file
     with open(args.output + '/variables.txt', 'r') as varfile:
         var_list = varfile.read().splitlines()
         pass
 
     # Read in preprocessed data
-    with h5py.File(args.output + '/output_Preprocessed.h5', 'r') as h5f:
+    with h5py.File('{}/output_Preprocessed{}.h5'.format(args.output, args.nametag), 'r') as h5f:
         bbjets = h5f['arr_processed_bbjets'][:]
         dijets = h5f['arr_processed_dijets'][:]
         if args.ttbar:
@@ -190,7 +177,7 @@ def main ():
             pass
         pass
 
-    # Normalise event weights
+    # Normalise event weights to sum of one
     ivar = var_list.index('weight')
     bbjets[:,ivar] /= np.sum(bbjets[:,ivar])
     dijets[:,ivar] /= np.sum(dijets[:,ivar])
@@ -210,20 +197,19 @@ def main ():
         pass
 
     # Convert to numpy.arrays in the expected format
-    array_bbjets    = np.rot90(np.array(dataset_bbjets))
-    array_dijets    = np.rot90(np.array(dataset_dijets))
+    array_bbjets    = np.vstack(dataset_bbjets).T
+    array_dijets    = np.vstack(dataset_dijets).T
     if args.ttbar:
-        array_ttbar = np.rot90(np.array(dataset_ttbar))
+        array_ttbar = np.vstack(dataset_ttbar).T
         pass
 
     # Perform re-weighting
     if args.pt_flat:
         print "Re-weighting to flat pT spectrum"
-        #bins_pt = np.linspace(250e3,3000e3,50)
-        weights_bbjets    = ptflat_reweight(array_bbjets, array_bbjets)  # , bins_pt=bins_pt)
-        weights_dijets    = ptflat_reweight(array_bbjets, array_dijets)  # , bins_pt=bins_pt)
+        weights_bbjets    = ptflat_reweight(array_bbjets, array_bbjets)
+        weights_dijets    = ptflat_reweight(array_bbjets, array_dijets)
         if args.ttbar:
-            weights_ttbar = ptflat_reweight(array_bbjets, array_ttbar)  # ,  bins_pt=bins_pt)
+            weights_ttbar = ptflat_reweight(array_bbjets, array_ttbar)
             pass
     else:
         print "Re-weighting in (pT, eta)"
@@ -242,6 +228,7 @@ def main ():
             h5f.create_dataset('ttbar_vs_bb_weights', data=weights_ttbar)
             pass
         pass
+
     return
 
 
