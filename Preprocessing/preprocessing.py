@@ -351,6 +351,8 @@ def main ():
 
     # Parse command-line arguments
     args = parse_args()
+    print "Command-line arguments:"
+    print args
 
     # Define common variables
     sigtxt    = "files/signal.txt"
