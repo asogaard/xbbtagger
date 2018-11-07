@@ -4,4 +4,5 @@ output
 **.h5
 **~
 **.pyc
+**.out
 KerasFiles
