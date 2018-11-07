@@ -349,7 +349,9 @@ def get_seq_model(model, nb_layers, nb_features, activation_function, l1, l2, ac
                 model.add(Dense(nb_classes*2, activation=activation_function, init=init, W_regularizer=l1l2(l1=l1, l2=l2), activity_regularizer=activity_l1l2(l1=activity_l1, l2=activity_l2)))
                 model.add(Dropout(0.1))
                 if nb_classes==2:
-                    model.add(Dense(nb_classes, activation="sigmoid", init=init))
+                    #model.add(Dense(nb_classes, activation="sigmoid",
+                    #init=init))
+                    model.add(Dense(1, activation="sigmoid", init=init))
             else:
                 model.add(Dense(nb_classes*2**5+16, activation=activation_function, init=init, input_shape=(nb_features,)))
                # model.add(Activation('linear'))  
@@ -369,7 +371,9 @@ def get_seq_model(model, nb_layers, nb_features, activation_function, l1, l2, ac
                 if batch_normalization:
                         model.add(BatchNormalization())
                 if nb_classes==2:
-                    model.add(Dense(nb_classes, activation="sigmoid", init=init))
+                    #model.add(Dense(nb_classes, activation="sigmoid",
+                    #init=init))
+                    model.add(Dense(1, activation="sigmoid", init=init))
 
         elif activation_function=="SReLU":
             if l1!=0. or l2!=0. or activity_l1!=0. or activity_l2!=0.:

@@ -15,6 +15,7 @@ def transform_for_Keras (nb_classes):
 
   FILE_PATH = '../Preprocessing/output/'
 
+  # @NOTE: THERE ARE TONS OF ALL-ZERO FEATURES!
   with h5py.File(FILE_PATH + 'prepared_sample_v2.h5', 'r') as f:
 
     X       = f['X'][:]
@@ -30,9 +31,9 @@ def transform_for_Keras (nb_classes):
     arr_jet_mass = f['arr_jet_mass'][:]
     arr_jet_eta  = f['arr_jet_eta'] [:]
     arr_baseline_tagger = f['arr_baseline_tagger'][:]
-    
+
     # transforms label entries to int32 and array to binary class matrix as required for categorical_crossentropy:
-    Y = np_utils.to_categorical(Y.astype(int), nb_classes)
+    #Y = np_utils.to_categorical(Y.astype(int), nb_classes)
     pass
   
   return X, Y, W_train, W_test, train, test, val, arr_baseline_tagger, arr_jet_pt, arr_jet_mass, arr_jet_eta
