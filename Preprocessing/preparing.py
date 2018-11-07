@@ -40,7 +40,9 @@ def main ():
 
   # Parse command-line arguments
   args = parse_args()
-
+  print "Command-line arguments:"
+  print args
+  
   # Read data from pre-processed HDF5 file
   with h5py.File('{}/output_Preprocessed{}.h5'.format(args.output, args.nametag), 'r') as h5f:
       bbjets = h5f['arr_processed_bbjets'][:]
@@ -59,7 +61,7 @@ def main ():
     # features
     X = np.concatenate((bbjets, dijets, ttbar))
     # classes # assuming dijet and ttbar are same (1)
-    Y = np.concatenate((np.zeros(len(bbjets)),np.ones(len(dijets)+len(ttbar))))
+    Y = np.concatenate((np.ones(len(bbjets)), np.zeros(len(dijets)+len(ttbar))))
     # weights
     W_train = np.concatenate(( bb_weight_train, di_weight_train, tt_weight_train))
     W_test  = np.concatenate(( bb_weight_test,  di_weight_test,  tt_weight_test))
@@ -67,11 +69,10 @@ def main ():
     # features
     X = np.concatenate((bbjets, dijets))
     # classes # assuming dijet and ttbar are same (1)
-    Y = np.concatenate((np.zeros(len(bbjets)),np.ones(len(dijets))))
+    Y = np.concatenate((np.ones(len(bbjets)), np.zeros(len(dijets))))
     # weights
     W_train = np.concatenate(( bb_weight_train, di_weight_train))
     W_test  = np.concatenate(( bb_weight_test,  di_weight_test))
-    #print W[:]
     pass
 
   # Read variable list from file
@@ -80,8 +81,8 @@ def main ():
     pass
 
   # Multiply re-weighing weights with MC weights
-  #W_train *= X[:,var_list.index('weight')]
-  #W_test  *= X[:,var_list.index('weight')]
+  W_train *= X[:,var_list.index('weight')]
+  W_test  *= X[:,var_list.index('weight')]
 
   # Normalise weights to unit mean within each class
   groups = [
@@ -108,14 +109,6 @@ def main ():
     W_test [group] *= W_test [groups[0]].sum() / float(len(groups) - 1)
     pass
 
-  # Shuffle arrays
-  indices = np.arange(X.shape[0], dtype=int)
-  np.random.shuffle(indices)
-
-  X = X[indices]
-  Y = Y[indices]
-  W_train = W_train[indices]
-  W_test  = W_test [indices]
 
   # ...
   n_mv2c   = len(variable_info.default_vars)*2 #FIXME: missing _trk_? -> FIXME: make it depend on number of subjets
@@ -140,23 +133,22 @@ def main ():
   arr_baseline_tagger = X[:,tmp:tmp+n_mv2c] #don't hard code this!
   # features
   X = X[:,ini_feature:]
-  print "inesochoa 0: this should pT = ",X[:,0]
 
-  # train, test and validation sets
-  # features
-  zeros = np.zeros((X.shape[0],), dtype=bool)
-  train = np.array(zeros) 
-  test  = np.array(zeros) 
-  val   = np.array(zeros)
-  
-  train[:int(frac[0]*X.shape[0])] = True
-  test [int(frac[0]*X.shape[0])+1:int(frac[1]*X.shape[0])] = True
-  val  [int(frac[1]*X.shape[0])+1:] = True
+  # Get random train, test and validation masks (in place of shuffling)
+  np.random.seed(21)  # @TEMP
+  code = np.random.rand(X.shape[0])
+  th_train = np.percentile(code, frac[0] * 100.)   # Get 80th percentile
+  th_test  = np.percentile(code, frac[1] * 100.)   # Get 90th percentile
+
+  train = (code <= th_train)
+  test  = (code <= th_test) & (~train)
+  val   = (~train) & (~test)
 
   # --- finally, prepare output h5
   mean = np.mean(X[train], axis=0)
   std  = np.std (X[train], axis=0)
 
+  
   # Save to HDF5
   # --------------------------
   datasets = {
@@ -171,7 +163,7 @@ def main ():
     'test':  test,
     'val':   val,
 
-    # Per-clas data
+    # Per-class data
     'dijet': dijets,
     'bbjet': bbjets,
     'dijet_weight_train': di_weight_train,
@@ -200,8 +192,8 @@ def main ():
   save_to_hdf5(args.output + '/prepared_sample_no_scaling_v2.h5', datasets)
 
   # Do rescaling of `X`
-  for i in range(n_feature-1):
-    if (std[i]!=0 and bool(args.scaling)):
+  for i in range(n_feature - 1):
+    if std[i] != 0 and (not args.no_scaling):
       X[:,i] = (X[:,i] - mean[i]) / std[i]
       pass
     pass
@@ -210,7 +202,7 @@ def main ():
   datasets['X'] = X
 
   # Save to HDF5
-  save_to_hdf5(args.output+'/prepared_sample_v2.h5', datasets)
+  save_to_hdf5(args.output + '/prepared_sample_v2.h5', datasets)
   pass
 
 
