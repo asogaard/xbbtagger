@@ -17,6 +17,11 @@ $ cd <YOUR-WORKING-DIRECTORY>
 $ git clone git@github.com:asogaard/xbbtagger.git
 $ cd xbbtagger
 ```
+In the future, you can use the provided script to log onto Eddie:
+```bash
+$ source login.sh --help
+$ source login.sh gpu 20gb
+```
 
 Setup the environment
 ```bash
@@ -68,11 +73,23 @@ Go into the Training folder
 $ cd ../Training
 ```
 
-Run the training code using TensorFlow (GPU?)
+Run the training code using TensorFlow (GPU should automatically be inferred if available)
 ```bash
 $ KERAS_BACKEND=tensorflow python btagging_nn.py --input_file ../Preprocessing/output/prepared_sample_v2.h5 --batch_size=8192
 ```
 or using Theano on GPU
 ```bash
 MKL_THREADING_LAYER=GNU THEANO_FLAGS=device=cuda,floatX=float32 python btagging_nn.py --input ../Preprocessing/output/prepared_sample_v2.h5 --batch_size=8192
+```
+
+If you want to train multiple classifier on individual pT-slices, please read [_Parameterized Machine Learning for High-Energy Physics_](https://arxiv.org/abs/1601.07913) by Baldi et al. (2016).
+If you __still__ want to do it, you can run e.g.
+```bash
+$ KERAS_BACKEND=tensorflow python btagging_nn.py --pt-slice 200 300
+```
+which saves the trained model in a unique directory (`KerasFiles/*__pT_200_300GeV/`) which allows you to easily distinguish different models.
+
+To run everything, from reweighting to training, in one go, you can use the provided script
+```bash
+$ source run.sh
 ```
