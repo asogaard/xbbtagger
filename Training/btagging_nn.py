@@ -228,6 +228,13 @@ def _run():
             evaluation_time=time.time()-evaluation_time
             protocol_dict.update({"Classification score": score[0],"Classification accuracy": score[1]})
 
+
+            # (Opt.) reload data if pt-sliced
+            if args.pt_slice:
+                X, Y, W_train, W_test, train, test, val, arr_baseline_tagger, arr_jet_pt, arr_jet_mass, arr_jet_eta = transform_for_Keras(nb_classes)
+                pass
+
+
             prediction_time = time.time()
             predictions = model.predict(X[test], batch_size=args.batch_size, verbose=1) # returns predictions as numpy array
             prediction_time=time.time()-prediction_time
