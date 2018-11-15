@@ -49,18 +49,29 @@ def _run():
     nb_features = X.shape[1]  # 100
 
     # Impose pT-selection
-    if args.pt_slice:
+    if args.pt_slice or args.mass_slice or args.eta_slice:
         # Check(s)
-        assert len(args.pt_slice) == 2, \
-            "Please specify the pT-slice as a pair (2) of integers. Got {}.".format(len(args.pt_slice))
-        assert args.pt_slice[0] < args.pt_slice[1], \
-            "Please specify the lower bound on pT before the upper one. Got {}.".format(args.pt_slice)
+        slices = [args.pt_slice, args.mass_slice, args.eta_slice]
+        assert sum(map(bool, slices)) == 1, \
+            "Please specify only one slice."
+
+        # -- Determine slice to use
+        ix = np.argmax(map(bool, slices))
+        slice     = np.asarray(slices)[ix]
+        arr       = np.asarray([arr_jet_pt, arr_jet_mass, arr_jet_eta])[ix]
+        slice_var = np.asarray(['pt', 'mass', 'eta'])[ix]
+        scale     = np.asarray([1.0E+03, 1.0E+03, 1.])[ix]
+
+        assert len(slice) == 2, \
+            "Please specify the slice as a pair (2) of integers. Got {}.".format(len(slice))
+        assert slice[0] < slice[1], \
+            "Please specify the lower bound before the upper one. Got {}.".format(slice)
 
         # Create mask for requested pT-slice
-        msk_slice = (arr_jet_pt >= args.pt_slice[0] * 1.0E+03) & (arr_jet_pt < args.pt_slice[1] * 1.0E+03)
+        msk_slice = (arr >= slice[0] * scale) & (arr < slice[1] * scale)
 
         assert sum(msk_slice) > 0, \
-            "No jets in pT-slice."
+            "No jets in slice."
 
         print ("=" * 40)
         print ("WEIGHTS")
@@ -134,8 +145,8 @@ def _run():
 
         part_from_inFile = "mytest"
 
-        if args.pt_slice:
-            subdir_name += '__pT_{:d}_{:d}GeV'.format(*args.pt_slice)
+        if args.pt_slice or args.mass_slice or args.pt_slice:
+            subdir_name += '__{:s}_{:.0f}_{:.0f}'.format(slice_var, *slice)
             pass
 
         os.system("mkdir -p KerasFiles/%s/" % (subdir_name))
@@ -230,7 +241,7 @@ def _run():
 
 
             # (Opt.) reload data if pt-sliced
-            if args.pt_slice:
+            if args.pt_slice or args.mass_slice or args.eta_slice:
                 X, Y, W_train, W_test, train, test, val, arr_baseline_tagger, arr_jet_pt, arr_jet_mass, arr_jet_eta = transform_for_Keras(nb_classes)
                 pass
 
@@ -283,7 +294,9 @@ def _run():
 
 
 def _get_args():
-    help_pt_slice = "Impose pT selection using a pair of integers as lower and upper bounds. Leave black for inclusive pT selection."
+    help_pt_slice = "Impose pT selection using a pair of floats as lower and upper bounds. Leave black for inclusive pT selection."
+    help_mass_slice = "Impose mass selection using a pair of floats as lower and upper bounds. Leave black for inclusive mass selection."
+    help_eta_slice = "Impose eta selection using a pair of floats as lower and upper bounds. Leave black for inclusive mass selection."
     help_input_file = "Input file determining the pT and eta ranges as well as the c-fraction in the BG sample (default: %(default)s)."
     help_reload_nn = "Reload previously trained model, provide architecture (1st argument; JSON) and weights (2nd argument; HDF5) (default: %(default)s)."
     help_batch_size = "Batch size: Set the number of jets to look before updating the weights of the NN (default: %(default)s)."
@@ -302,7 +315,9 @@ def _get_args():
     help_activity_l2 = "L2 activity regularization (default: %(default)s)."
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__)
-    parser.add_argument("-pt", "--pt-slice", type=int, nargs='+', help=help_pt_slice)
+    parser.add_argument("-pt", "--pt-slice", type=float, nargs='+', help=help_pt_slice)
+    parser.add_argument("-mass", "--mass-slice", type=float, nargs='+', help=help_mass_slice)
+    parser.add_argument("-eta", "--eta-slice", type=float, nargs='+', help=help_eta_slice)
     parser.add_argument("-in", "--input_file", type=str,
                         default="PreparedSample__V47full_Akt4EMTo_bcujets_pTmax300GeV_TrainFrac85__b_reweighting.h5",
                         help=help_input_file)
