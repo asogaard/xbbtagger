@@ -19,7 +19,7 @@ from keras import backend
 from keras.models import Sequential
 from keras.models import Model
 from keras.utils import np_utils
-from keras.callbacks import ModelCheckpoint, EarlyStopping, Callback, LearningRateScheduler, History, ReduceLROnPlateau    
+from keras.callbacks import ModelCheckpoint, EarlyStopping, Callback, LearningRateScheduler, History, ReduceLROnPlateau
 from keras.utils.visualize_util import plot
 from keras.models import model_from_json
 
@@ -48,6 +48,91 @@ def _run():
     loading_time = end - begin  # in seconds
     nb_features = X.shape[1]  # 100
 
+    # Impose pT-selection
+    if args.pt_slice or args.mass_slice or args.eta_slice:
+        # Check(s)
+        slices = [args.pt_slice, args.mass_slice, args.eta_slice]
+        assert sum(map(bool, slices)) == 1, \
+            "Please specify only one slice."
+
+        # -- Determine slice to use
+        ix = np.argmax(map(bool, slices))
+        slice     = np.asarray(slices)[ix]
+        arr       = np.asarray([arr_jet_pt, arr_jet_mass, arr_jet_eta])[ix]
+        slice_var = np.asarray(['pt', 'mass', 'eta'])[ix]
+        scale     = np.asarray([1.0E+03, 1.0E+03, 1.])[ix]
+
+        assert len(slice) == 2, \
+            "Please specify the slice as a pair (2) of integers. Got {}.".format(len(slice))
+        assert slice[0] < slice[1], \
+            "Please specify the lower bound before the upper one. Got {}.".format(slice)
+
+        # Create mask for requested pT-slice
+        msk_slice = (arr >= slice[0] * scale) & (arr < slice[1] * scale)
+
+        assert sum(msk_slice) > 0, \
+            "No jets in slice."
+
+        print ("=" * 40)
+        print ("WEIGHTS")
+        print ("-" * 40)
+        print ("Initially")
+        print ("- " * 20)
+        print ("Train")
+        print ("  Background weights: sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_train[Y == 0].sum(), W_train[Y == 0].mean(), len(W_train[Y == 0])))
+        print ("  Signal weights:     sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_train[Y == 1].sum(), W_train[Y == 1].mean(), len(W_train[Y == 1])))
+        print ("Test")
+        print ("  Background weights: sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_test [Y == 0].sum(), W_test [Y == 0].mean(), len(W_test [Y == 0])))
+        print ("  Signal weights:     sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_test [Y == 1].sum(), W_test [Y == 1].mean(), len(W_test [Y == 1])))
+
+        # Select only jets in slice
+        X       = X      [msk_slice]
+        Y       = Y      [msk_slice]
+        W_train = W_train[msk_slice]
+        W_test  = W_test [msk_slice]
+        train   = train  [msk_slice]
+        test    = test   [msk_slice]
+        val     = val    [msk_slice]
+        arr_baseline_tagger = arr_baseline_tagger[msk_slice]
+        arr_jet_pt          = arr_jet_pt         [msk_slice]
+        arr_jet_mass        = arr_jet_mass       [msk_slice]
+        arr_jet_eta         = arr_jet_eta        [msk_slice]
+
+        print ("-" * 40)
+        print ("After pT-slice")
+        print ("- " * 20)
+
+        print ("Train")
+        print ("  Background weights: sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_train[Y == 0].sum(), W_train[Y == 0].mean(), len(W_train[Y == 0])))
+        print ("  Signal weights:     sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_train[Y == 1].sum(), W_train[Y == 1].mean(), len(W_train[Y == 1])))
+        print ("Test")
+        print ("  Background weights: sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_test [Y == 0].sum(), W_test [Y == 0].mean(), len(W_test [Y == 0])))
+        print ("  Signal weights:     sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_test [Y == 1].sum(), W_test [Y == 1].mean(), len(W_test [Y == 1])))
+
+        # Perform reweighting | @TODO Downsampling?
+        msk_sig = (Y == 1)
+
+        # -- Signal weights should have a mean of 1.
+        W_train[msk_sig] /= W_train[msk_sig].mean()
+        W_test [msk_sig] /= W_test [msk_sig].mean()
+
+        # -- Background weights should have same sum as signal weights
+        W_train[~msk_sig] *= W_train[msk_sig].sum() / W_train[~msk_sig].sum()
+        W_test [~msk_sig] *= W_test [msk_sig].sum() / W_test [~msk_sig].sum()
+
+        print ("-" * 40)
+        print ("After re-weighting")
+        print ("- " * 20)
+
+        print ("Train")
+        print ("  Background weights: sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_train[Y == 0].sum(), W_train[Y == 0].mean(), len(W_train[Y == 0])))
+        print ("  Signal weights:     sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_train[Y == 1].sum(), W_train[Y == 1].mean(), len(W_train[Y == 1])))
+        print ("Test")
+        print ("  Background weights: sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_test [Y == 0].sum(), W_test [Y == 0].mean(), len(W_test [Y == 0])))
+        print ("  Signal weights:     sum = {:.3f}, mean = {:.3f}, count = {:6d}".format(W_test [Y == 1].sum(), W_test [Y == 1].mean(), len(W_test [Y == 1])))
+
+        print ("=" * 40)
+        pass
 
     for arg in vars(args):
         protocol_dict.update({arg: getattr(args, arg)})
@@ -60,6 +145,10 @@ def _run():
 
         part_from_inFile = "mytest"
 
+        if args.pt_slice or args.mass_slice or args.pt_slice:
+            subdir_name += '__{:s}_{:.0f}_{:.0f}'.format(slice_var, *slice)
+            pass
+
         os.system("mkdir -p KerasFiles/%s/" % (subdir_name))
         os.system("mkdir -p KerasFiles/%s/Keras_output/" % (subdir_name))
         os.system("mkdir -p KerasFiles/%s/Keras_callback_ModelCheckpoint/" % (subdir_name))
@@ -69,6 +158,7 @@ def _run():
         subdir_name = args.reload_nn[0].split(".json")[0].split('/')[1]
         model = model_from_json(open(args.reload_nn[0]).read())
         model.load_weights(args.reload_nn[1])
+
 
     learning_rate=args.learning_rate
     for learning_rate in [0.01]:
@@ -100,7 +190,7 @@ def _run():
             # Callback: will save weights (= model checkpoint) if the validation loss reaches a new minium at the latest epoch
             if bool(args.func) == True: model_check_point = ModelCheckpoint("KerasFiles/"+subdir_name+"/Keras_callback_ModelCheckpoint/Func_weights_"+out_str+"__{epoch:02d}-{val_loss:.4f}-{val_acc:.4f}.hdf5", monitor="val_loss", verbose=1, save_best_only=True, mode="auto")
             else: model_check_point = ModelCheckpoint("KerasFiles/"+subdir_name+"/Keras_callback_ModelCheckpoint/weights_"+out_str+"__{epoch:02d}-{val_loss:.4f}-{val_acc:.4f}.hdf5", monitor="val_loss", verbose=1, save_best_only=True, mode="auto")
-            
+
             learning_rate_reduction = ReduceLROnPlateau(monitor = 'val_loss', patience = 5, verbose = 1, factor=0.5, min_lr = 0.000001)
             print( learning_rate_reduction)
 
@@ -109,7 +199,7 @@ def _run():
             #callbacks.append(learning_rate_reduction)
             if args.patience>=0:
                 callbacks.append(early_stopping)
-               
+
             if backend._BACKEND=="tensorflow":
                 os.system("mkdir -p ./KerasFiles/TensorFlow_logs/")
                 tensorboard = TensorBoard(log_dir='KerasFiles/TensorFlow_logs/'+out_str, histogram_freq=1)
@@ -136,7 +226,7 @@ def _run():
                                     verbose=1,
                                     validation_split=args.validation_split,
                                     sample_weight=W_train[train],
-                                    shuffle=True# (default) 
+                                    shuffle=True# (default)
                                    ) # shuffle=True (default)
             # store history:
             history_filename = "KerasFiles/"+subdir_name+"/Keras_output/hist__"+out_str+".h5"
@@ -148,6 +238,13 @@ def _run():
                                    #show_accuracy=True,  sample_weight=sample_weights_testing, verbose=1)#inesochoa
             evaluation_time=time.time()-evaluation_time
             protocol_dict.update({"Classification score": score[0],"Classification accuracy": score[1]})
+
+
+            # (Opt.) reload data if pt-sliced
+            if args.pt_slice or args.mass_slice or args.eta_slice:
+                X, Y, W_train, W_test, train, test, val, arr_baseline_tagger, arr_jet_pt, arr_jet_mass, arr_jet_eta = transform_for_Keras(nb_classes)
+                pass
+
 
             prediction_time = time.time()
             predictions = model.predict(X[test], batch_size=args.batch_size, verbose=1) # returns predictions as numpy array
@@ -167,7 +264,7 @@ def _run():
             model.save_weights("KerasFiles/"+subdir_name+"/Keras_output/flavtag_model_weights__"+out_str+".h5", overwrite=True)
             if not bool(args.func): classes = model.predict_classes(X[test], batch_size=args.batch_size)#, sample_weight=sample_weights[test]ing)
             plot(model, to_file="KerasFiles/"+subdir_name+"/Keras_output/plot__"+out_str+"model.eps")
-            loss_list = history.history['loss']                                                                                                                                                                        
+            loss_list = history.history['loss']
 
             protocol_dict.update(timing_dict)
 
@@ -197,6 +294,9 @@ def _run():
 
 
 def _get_args():
+    help_pt_slice = "Impose pT selection using a pair of floats as lower and upper bounds. Leave black for inclusive pT selection."
+    help_mass_slice = "Impose mass selection using a pair of floats as lower and upper bounds. Leave black for inclusive mass selection."
+    help_eta_slice = "Impose eta selection using a pair of floats as lower and upper bounds. Leave black for inclusive mass selection."
     help_input_file = "Input file determining the pT and eta ranges as well as the c-fraction in the BG sample (default: %(default)s)."
     help_reload_nn = "Reload previously trained model, provide architecture (1st argument; JSON) and weights (2nd argument; HDF5) (default: %(default)s)."
     help_batch_size = "Batch size: Set the number of jets to look before updating the weights of the NN (default: %(default)s)."
@@ -215,6 +315,9 @@ def _get_args():
     help_activity_l2 = "L2 activity regularization (default: %(default)s)."
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__)
+    parser.add_argument("-pt", "--pt-slice", type=float, nargs='+', help=help_pt_slice)
+    parser.add_argument("-mass", "--mass-slice", type=float, nargs='+', help=help_mass_slice)
+    parser.add_argument("-eta", "--eta-slice", type=float, nargs='+', help=help_eta_slice)
     parser.add_argument("-in", "--input_file", type=str,
                         default="PreparedSample__V47full_Akt4EMTo_bcujets_pTmax300GeV_TrainFrac85__b_reweighting.h5",
                         help=help_input_file)

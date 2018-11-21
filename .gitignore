@@ -6,3 +6,4 @@ output
 **.pyc
 **.out
 KerasFiles
+.ipynb_checkpoints/
