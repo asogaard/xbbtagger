@@ -38,8 +38,8 @@ $ cd Preprocessing
 Copy over the data
 ```bash
 $ mkdir -p /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/{input,output}
-$ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/ input
-$ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/ output
+$ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/input  input
+$ ln -s /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/output output
 $ scp -r <USERNAME>@lxplus.cern.ch:/afs/cern.ch/work/a/asogaard/public/xbbtagger/input/* /exports/eddie/scratch/<UUN>/xbbtagger/preprocessing/input/
 ```
 
